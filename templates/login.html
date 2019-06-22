@@ -2,10 +2,10 @@
 
 {% block body %}
    LOGIN 
-<form action="">
-    {{form.username.label(class="form-control-label")}}
+<form action="/login" method="POST">
+    {{form.name.label(class="form-control-label")}}
     <br>
-    {{form.username}}
+    {{form.name}}
     <br>
     password 
     <br>

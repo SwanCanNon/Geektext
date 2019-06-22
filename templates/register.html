@@ -1,7 +1,9 @@
 {% extends 'layout.html'%}
 
 {% block body %}
+<form action="/register" method="POST">
     REGISTER 
+    {{ form.csrf_token }}
     <br>
     {{form.username.label(class="form-control-label")}}
     <br>
@@ -21,4 +23,5 @@
     <br>
     <br>
     {{form.submit(class="btn-primary")}}
+</form>
 {% endblock %}
