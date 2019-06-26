@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1 id="books">My Cart</h1>
+    <div class="container">
+    <button id="addbookbutton"><a href="/addbook">Add Book</a></button>
+    <table class="table mt-5">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">No.</th>
+            <th scope="col">Title</th>
+            <th scope="col">Price</th>
+            <th scope="col">Remove</th>
+            <th scope="col">Add</th>
+            <th scope="col">Save for later</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for i in range(cart_books) %}
+                    <tr>
+                    <td>{{ i+1 }}</td>
+                    <td>{{books[i].title}}</td>
+                    <td>{{books[i].price}}</td>
+                    <td><a href="{{ url_for('delete_book',book_id= books[i].id )}}" class="btn btn-outline-danger">Delete</a></td>
+                    <td><a href="{{ url_for('add_to_cart', book_id= books[i].id)}}" class="btn btn-outline-success">Add</a></td>
+                    <td><a href="{{ url_for('save_for_later', book_id= books[i].id)}}" class="btn btn-outline-success">Save For later</a></td>
+                    </tr>
+            {% endfor %}
+                <!-- {% for book in books %}
+                    <tr>
+                    <td>{{ 1 }}</td>
+                    <td>{{book.title}}</td>
+                    <td>{{book.price}}</td>
+                    <td><a href="{{ url_for('delete_book',book_id= book.id )}}" class="btn btn-outline-danger">Delete</a></td>
+                    <td><a href="{{ url_for('add_to_cart', book_id= book.id)}}" class="btn btn-outline-success">Add</a></td>
+                    <td><a href="{{ url_for('save_for_later', book_id= book.id)}}" class="btn btn-outline-success">Save For later</a></td>
+                    </tr>
+                {% endfor %} -->
+        </tbody>
+      </table>
+      <h1>Total price: {{ total_price }}</h1>
+    </div>
+
+      <div class="container">
+          <h2 class="text-center">Saved For Later</h2>
+      <table class="table mt-5">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Title</th>
+                <th scope="col">Price</th>
+                <th scope="col">Remove</th>
+                <th scope="col">Move to cart</th>
+              </tr>
+            </thead>
+            <tbody>
+                    {% for i in range(total_saved_books) %}
+                        <tr>
+                        <td>{{ i+1 }}</td>
+                        <td>{{saved_books[i].title}}</td>
+                        <td>{{saved_books[i].price}}</td>
+                        <td><a href="{{ url_for('delete_saved_book',book_id= saved_books[i].id )}}" class="btn btn-outline-danger">Delete</a></td>
+                        <td><a href="{{ url_for('move_to_cart', book_id= saved_books[i].id)}}" class="btn btn-outline-success">Move to cart</a></td>
+                        </tr>
+                    {% endfor %}
+            </tbody>
+          </table>
+          <h1>Total price: {{ saved_books_price }}</h1>
+          <a href=""><button class="btn btn-success">Checkout</button></a>
+          
+    </div>
+
+      
+{% endblock %}

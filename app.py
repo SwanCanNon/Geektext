@@ -1,12 +1,16 @@
-from flask import Flask,flash, render_template,redirect,make_response,request,url_for,session  
+from flask import Flask,flash, render_template,redirect,make_response,request,url_for,session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate 
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,SubmitField 
-from wtforms.validators import InputRequired,Email,Length 
+from wtforms.validators import InputRequired,Email,Length,DataRequired
+from flask_login import LoginManager,current_user,login_user,UserMixin,logout_user
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
+# app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
+
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geekText"
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
@@ -16,7 +20,13 @@ book_copies = db.Table('book_copies',
     db.Column('book_id',db.Integer,db.ForeignKey('book.id'))
 )
 
-class RegistrationForm(Form):
+login_manager = LoginManager(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class RegistrationForm(FlaskForm):
     username = StringField('name',[validators.Length(min=4,max=25)])
     email    = StringField('email',[validators.Length(min=6,max=35)])
     password = PasswordField('password',[
@@ -27,19 +37,28 @@ class RegistrationForm(Form):
     accept_tos = BooleanField('I accept the TOS',[validators.DataRequired])
     submit  = SubmitField('Sign up')
 
-class LoginForm(Form):
-    name = StringField('name',validators=[InputRequired(),Length(min=8,max=80)])
-    password = PasswordField('password',validators=[InputRequired(),Length(min=8,max=60)])
-    remmember = BooleanField('remmember me')
-    submit   = SubmitField('Login')
+# class LoginForm(FlaskForm):
+#     name = StringField('name',validators=[InputRequired(),Length(min=8,max=80)])
+#     password = PasswordField('password',validators=[InputRequired(),Length(min=8,max=60)])
+#     remember = BooleanField('remember me')
+#     submit   = SubmitField('Login')
+
+class LoginForm(FlaskForm):
+    name = StringField('name',validators=[DataRequired(),Length(min=4,max=80)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember = BooleanField('Remember Me')
+    submit = SubmitField('Login')
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     email = db.Column(db.String(128))
     password = db.Column(db.String(128))
     books = db.relationship('Book',secondary=book_copies,backref=db.backref('users',lazy='dynamic'))
+
+    def __str__(self):
+        return self.name
 
 class Book(db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -48,42 +67,87 @@ class Book(db.Model):
     description = db.Column(db.String(128))
     price = db.Column(db.Float)
 
+    def __str__(self):
+        return f"{self.title}"
+
 class Category(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(128))
     user_id = db.Column(db.Integer,db.ForeignKey('book.id'))
 
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    quantity = db.Column(db.Integer)
+
+    def __str__(self):
+        book = Book.query.get(self.book_id)
+        return f"{book.title}"
+
+class Saveforlater(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+
+    def __str__(self):
+        book = Book.query.get(self.book_id)
+        return f"{book.title}"
+
 @app.route('/')
 def index():
     return render_template('books.html')
 
+# @app.route('/login',methods=['GET','POST'])
+# def login():
+#     form = LoginForm()
+#     # session.pop('user',None)
+
+#     if 'user' in session:
+#         return redirect(url_for(index))
+
+#     if request.method == 'POST':
+        
+#         username = request.form['name']
+#         password = request.form['password']
+#         exists = db.session.query(User.id).filter_by(name=username,password=password).scalar() is not None
+#         if exists == True: 
+#             # username and password found now they will be logged in 
+#             session['user'] = request.form['name']
+#             flash("You are now logged in",'success')
+#             return redirect(url_for('books'))
+
+#         else:          
+#             flash("That username could not be found/password/username are incorrect",'error')
+#             return redirect(url_for("login"))
+#     return render_template('login.html',form=form)
+
+
 @app.route('/login',methods=['GET','POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = LoginForm()
-    # session.pop('user',None)
-
-    if 'user' in session:
-        return redirect(url_for(index))
-
-    if request.method == 'POST':
-        
-        username = request.form['name']
-        password = request.form['password']
-        exists = db.session.query(User.id).filter_by(name=username,password=password).scalar() is not None
-
-        if exists == True: 
-            # username and password found now they will be logged in 
-            session['user'] = request.form['name'] 
+    if form.validate_on_submit():
+        user = User.query.filter_by(name=form.name.data).first()
+        if user and (user.password == form.password.data):
+            login_user(user, remember=form.remember.data)
             flash("You are now logged in",'success')
-            return redirect(url_for('books'))
-        else:          
+            return redirect(url_for('index'))
+        else:
             flash("That username could not be found/password/username are incorrect",'error')
-            return redirect(url_for("login"))
-    return render_template('login.html',form=form)
+    return render_template('login.html', title='Login', form=form)
 
-@app.route('/logout')
+
+# @app.route('/logout')
+# def logout():
+#     session.pop('user',None)
+#     flash("You have been logged out",'success')
+#     return render_template('books.html')
+
+@app.route("/logout")
 def logout():
-    session.pop('user',None)
+    logout_user()
     flash("You have been logged out",'success')
     return render_template('books.html')
 
@@ -129,8 +193,13 @@ def books():
         print(book.title)
         print(book.description)
         print(book.price)
-
     return render_template('books.html',books=books)
+
+
+@app.route('/admin',methods=['GET'])
+def admin():
+
+    return render_template('admin.html')
 
 @app.route('/addbook',methods=['GET','POST'])
 def addbook():
@@ -138,6 +207,9 @@ def addbook():
         book_name = request.form['book_name']
         book_description = request.form['book_description']
         book_price = request.form['book_price']
+        book = Book(title=book_name,description=book_description,price=book_price)
+        db.session.add(book)
+        db.session.commit()
 
     return render_template('addbook.html')
 
@@ -145,8 +217,8 @@ def addbook():
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
-
     return render_template('book.html',book=book)
+    
 
 @app.route('/user_books')
 def user_books(id):
@@ -169,23 +241,67 @@ def user_book(id):
     books = Book.query.filter_by()
     return render_template('user_books.html')
 
-@app.route('/add_to_cart<int:id>')
-def add_to_cart(id):
+@app.route('/add_to_cart/<int:book_id>')
+def add_to_cart(book_id):
+    user_id = current_user.id
     # check thru books for the book with the specified id 
-    # check thru the book copy for the book copy with the id 
+    # check thru the book copy for the book copy with the id
+    book = Cart(user_id=user_id,book_id=book_id,quantity=1)
+    db.session.add(book)
+    db.session.commit()
    
-    return render_template('books.html')
+    return redirect(url_for('books'))
+
+
+@app.route('/save_for_later/<int:book_id>')
+def save_for_later(book_id):
+    user_id = current_user.id
+    # check thru books for the book with the specified id 
+    # check thru the book copy for the book copy with the id
+    book = Saveforlater(user_id=user_id,book_id=book_id)
+    db.session.add(book)
+    db.session.commit()
+
+    book_to_delete = Cart.query.filter_by(user_id=current_user.id,book_id=book_id).first()
+    print(book_to_delete.id)
+        # print(book_to_delete)
+    db.session.delete(book_to_delete)
+    db.session.commit()
+   
+    return redirect(url_for('cart'))
 
 @app.route('/cart')
 def cart():
     # query the db for the cart object with the 
     # user id of the user of the current session
+    user_id = current_user.id
+    user_cart = Cart.query.filter_by(user_id = user_id).all()
+    all_saved_books = Saveforlater.query.filter_by(user_id = user_id).all()
+    user_books = []
+    saved_books  = []
+    saved_books_price = 0
+    total_price = 0
 
-    return render_template('cart.html')
+    for book in user_cart:
+        book_id = book.book_id
+        book = Book.query.filter_by(id=book_id).first()
+        total_price = book.price + total_price
+        user_books.append(book)
+
+    for book in all_saved_books:
+        book_id = book.book_id
+        book = Book.query.filter_by(id=book_id).first()
+        saved_books_price = saved_books_price + book.price
+        saved_books.append(book)
+
+    cart_books = len(user_books)
+    total_saved_books = len(all_saved_books)
+
+    return render_template('cart.html',total_price=total_price,books=user_books,saved_books=saved_books,saved_books_price=saved_books_price,cart_books=cart_books,total_saved_books=total_saved_books)
 
 @app.route('/checkout',methods=['GET','POST'])
 def checkout():
-    if request.method == 'GET':
+    if request.method == 'POST':
         print("het")
     else:
         pass 
@@ -194,6 +310,37 @@ def checkout():
     # add transaction to the database 
 
     return render_template('checkout.html')
+
+@app.route('/delete_book/<int:book_id>')
+def delete_book(book_id):
+    book_to_delete = Cart.query.filter_by(user_id=current_user.id,book_id=book_id).first()
+    db.session.delete(book_to_delete)
+    db.session.commit()
+
+    return redirect(url_for('cart'))
+
+@app.route('/delete_saved_book/<int:book_id>')
+def delete_saved_book(book_id):
+    book_to_delete = Saveforlater.query.filter_by(user_id=current_user.id,book_id=book_id).first()
+    db.session.delete(book_to_delete)
+    db.session.commit()
+
+    return redirect(url_for('cart'))
+
+@app.route('/move_to_cart/<int:book_id>')
+def move_to_cart(book_id):
+    user_id = current_user.id
+    # check thru books for the book with the specified id 
+    # check thru the book copy for the book copy with the id
+    book = Cart(user_id=user_id,book_id=book_id,quantity=1)
+    db.session.add(book)
+    db.session.commit()
+    
+    book_to_delete = Saveforlater.query.filter_by(user_id=current_user.id,book_id=book_id).first()
+    db.session.delete(book_to_delete)
+    db.session.commit()
+   
+    return redirect(url_for('cart'))
 
 @app.route('/success_checkout')
 def success_checkout():
@@ -206,4 +353,3 @@ def success_checkout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -2,9 +2,24 @@
 
 {% block body %}
 
- {{book.title}}
+<div class="container">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title"> {{book.title}}</h5>
+          <p class="card-text">{{ book.description }}</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">{{ book.price }}</li>
+        </ul>
+        <div class="card-body">
+          <a href="{{ url_for('add_to_cart', user_id=current_user.id, book_id=book.id) }}" class="card-link">Add to Cart</a>
+          <a href="{{ url_for('save_for_later',book_id=book.id) }}" class="card-link">Save for later</a>
+        </div>
+      </div>
+</div>
 
- <div id="mybook">
+
+ <!-- <div id="mybook">
     <div>
         <h3>Yay, Page 1!</h3>
     </div>
@@ -17,7 +32,7 @@
     <div>
         <h3>Yay, Page 4!</h3>
     </div>
-</div>
+</div> -->
 
 
 

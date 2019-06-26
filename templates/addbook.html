@@ -4,7 +4,7 @@
 
 <h2>Add Book</h2>
 
-<form method="POST" action="addbook">
+<form method="POST" action="{{ url_for('addbook') }}">
         <label for="book_name">Name</label>
         <br>
         <input type="text" name="book_name">
@@ -12,11 +12,11 @@
         <br>
         <p>Descriptiom</p>
 
-        <textarea name="description"></textarea>
+        <textarea name="book_description"></textarea>
         <br>
         <br>
         <p>Price</p>
-        <input type="text" name="price">
+        <input type="text" name="book_price">
         <br>
         <br>
         <button type="submit" class="btn btn-primary">Submit</button>
