@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geekText"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
 
@@ -48,7 +48,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
-
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -195,23 +194,21 @@ def books():
         print(book.price)
     return render_template('books.html',books=books)
 
+@app.route('/user_profile',methods=['GET','POST'])
+def user_profile():
+    # get the current user in session 
+    # check the user object from the database 
+    # pass the user object   
+
+
+    return render_template('user_profile.html')
 
 @app.route('/admin',methods=['GET'])
 def admin():
 
     return render_template('admin.html')
 
-@app.route('/addbook',methods=['GET','POST'])
-def addbook():
-    if request.method == 'POST':
-        book_name = request.form['book_name']
-        book_description = request.form['book_description']
-        book_price = request.form['book_price']
-        book = Book(title=book_name,description=book_description,price=book_price)
-        db.session.add(book)
-        db.session.commit()
 
-    return render_template('addbook.html')
 
 # book edit view 
 @app.route('/book/<int:id>')
@@ -353,3 +350,15 @@ def success_checkout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/addbook',methods=['GET','POST'])
+def addbook():
+    if request.method == 'POST':
+        book_name = request.form['book_name']
+        book_description = request.form['book_description']
+        book_price = request.form['book_price']
+        book = Book(title=book_name,description=book_description,price=book_price)
+        db.session.add(book)
+        db.session.commit()
+
+    return render_template('addbook.html')
