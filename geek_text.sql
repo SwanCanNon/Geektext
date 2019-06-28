@@ -59,6 +59,10 @@ CREATE TABLE `book` (
   `price` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO `book` (`id`, `image_path`, `title`, `description`, `price`) VALUES
+(1, 'C:\\code\\geek\\Geektext\\static\\images\\cover_gameofthrones01.jpg', 'A Game of Thrones', 'A Game of Thrones is the first novel in A Song of Ice and Fire, a series of fantasy novels', '19.99');
+
+
 -- --------------------------------------------------------
 
 --
@@ -77,6 +81,9 @@ CREATE TABLE `books` (
   `BookCover` varchar(200) DEFAULT NULL,
   `BookRating` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
 
 -- --------------------------------------------------------
 

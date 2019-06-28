@@ -5,15 +5,19 @@ from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,SubmitField 
 from wtforms.validators import InputRequired,Email,Length,DataRequired
 from flask_login import LoginManager,current_user,login_user,UserMixin,logout_user
+import os
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geekText"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
+
+IMAGES = os.path.join('/static', 'images')
+app.config['UPLOAD_FOLDER'] = IMAGES
 
 book_copies = db.Table('book_copies',
     db.Column('user_id',db.Integer,db.ForeignKey('user.id')),
@@ -217,7 +221,8 @@ def addbook():
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
-    return render_template('book.html',book=book)
+    ifilename = os.path.join(app.config['UPLOAD_FOLDER'], '1.jpg')
+    return render_template('book.html', user_image=ifilename, book=book)
     
 
 @app.route('/user_books')
