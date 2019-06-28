@@ -1,1 +1,1 @@
-List of features moved to TODO
+List of features moved to PROJECT
