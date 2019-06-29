@@ -13,7 +13,9 @@ app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
+
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
 
@@ -98,7 +100,7 @@ class Saveforlater(db.Model):
         book = Book.query.get(self.book_id)
         return f"{book.title}"
 
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def index():
     return render_template('books.html')
 
@@ -188,7 +190,7 @@ def register():
 
     return render_template('register.html',form=form)
 
-@app.route('/books')
+@app.route('/books',methods=['GET','POST'])
 def books():
     books = Book.query.all()
     print(books)
@@ -199,21 +201,28 @@ def books():
         print(book.price)
     return render_template('books.html',books=books)
 
+# @login_manager.user_loader
 @app.route('/user_profile',methods=['GET','POST'])
 def user_profile():
-    # get the current user in session 
-    # check the user object from the database 
-    # pass the user object   
+    if request.method == "POST":
+        request.form['name']
+        request.form['email']
+        request.form['home_address']
+        request.form['physical_address']
+        request.form['creditcard_number']
 
 
+    # query for the active users credit cards 
+    # query for the active users 
+
+
+    
     return render_template('user_profile.html')
 
 @app.route('/admin',methods=['GET'])
 def admin():
 
     return render_template('admin.html')
-
-
 
 # book edit view 
 @app.route('/book/<int:id>')
@@ -353,10 +362,6 @@ def success_checkout():
 
     return render_template('success_checkout')
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 @app.route('/addbook',methods=['GET','POST'])
 def addbook():
     if request.method == 'POST':
@@ -368,3 +373,8 @@ def addbook():
         db.session.commit()
 
     return render_template('addbook.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
