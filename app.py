@@ -95,7 +95,7 @@ class Saveforlater(db.Model):
         book = Book.query.get(self.book_id)
         return f"{book.title}"
 
-@app.route('/')
+@app.route('/',methods=['GET','POST'])
 def index():
     return render_template('books.html')
 
@@ -185,7 +185,7 @@ def register():
 
     return render_template('register.html',form=form)
 
-@app.route('/books')
+@app.route('/books',methods=['GET','POST'])
 def books():
     books = Book.query.all()
     print(books)
