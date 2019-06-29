@@ -60,7 +60,7 @@ CREATE TABLE `book` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `book` (`id`, `image_path`, `title`, `description`, `price`) VALUES
-(1, 'C:\\code\\geek\\Geektext\\static\\images\\cover_gameofthrones01.jpg', 'A Game of Thrones', 'A Game of Thrones is the first novel in A Song of Ice and Fire, a series of fantasy novels', '19.99');
+(1, 'https://github.com/GustavoPT/GeekTextImages/blob/master/cover_gameofthrones01.jpg?raw=true', 'A Game of Thrones', 'A Game of Thrones is the first novel in A Song of Ice and Fire, a series of fantasy novels', '19.99');
 
 
 -- --------------------------------------------------------
