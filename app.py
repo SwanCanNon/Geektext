@@ -57,9 +57,25 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(128))
     password = db.Column(db.String(128))
     books = db.relationship('Book',secondary=book_copies,backref=db.backref('users',lazy='dynamic'))
-
+    user_cards = db.relationship('User_Cards',backref='user')
+    user_shippings = db.relationship('User_Shippings',backref='user')
     def __str__(self):
         return self.name
+
+class User_Cards(db.Model):
+    UserID = db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True)
+    CreditCardNum = db.Column(db.Integer,primary_key=True)
+    ExpMonth = db.Column(db.Integer)
+    ExpYear = db.Column(db.Integer)
+    CVS = db.Column(db.Integer)
+    NameOnCard = db.Column(db.String(128))
+
+class User_Shippings(db.Model):
+    UserID = db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True)
+    ShippingAddr = db.Column(db.String(128))
+    ShippingCity = db.Column(db.String(128))
+    ShippingState = db.Column(db.String(128))
+    ShippingZip = db.Column(db.String(128))
 
 class Book(db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -213,6 +229,22 @@ def user_profile():
 
     
     return render_template('user_profile.html')
+
+@app.route('/add_credit_card',methods=['GET','POST'])
+def add_credit_card():
+
+    if request.method == 'POST':
+
+
+    return redirect(url_for('user_profile'))
+
+@app.route('/add_shipping_address',methods=['GET','POST'])
+def add_credit_card():
+
+    if request.method == 'POST':
+        
+
+    return redirect(url_for('user_profile'))
 
 @app.route('/admin',methods=['GET'])
 def admin():
