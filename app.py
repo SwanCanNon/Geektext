@@ -5,17 +5,20 @@ from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,SubmitField 
 from wtforms.validators import InputRequired,Email,Length,DataRequired
 from flask_login import LoginManager,current_user,login_user,UserMixin,logout_user
+import os
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
+
 
 book_copies = db.Table('book_copies',
     db.Column('user_id',db.Integer,db.ForeignKey('user.id')),
@@ -96,8 +99,16 @@ class Saveforlater(db.Model):
         return f"{book.title}"
 
 @app.route('/',methods=['GET','POST'])
+@app.route('/books',methods=['GET','POST'])
 def index():
-    return render_template('books.html')
+    books = Book.query.all()
+    print(books)
+
+    for book in books:
+        print(book.title)
+        print(book.description)
+        print(book.price)
+    return render_template('books.html',books=books)
 
 # @app.route('/login',methods=['GET','POST'])
 # def login():
@@ -185,17 +196,6 @@ def register():
 
     return render_template('register.html',form=form)
 
-@app.route('/books',methods=['GET','POST'])
-def books():
-    books = Book.query.all()
-    print(books)
-
-    for book in books:
-        print(book.title)
-        print(book.description)
-        print(book.price)
-    return render_template('books.html',books=books)
-
 # @login_manager.user_loader
 @app.route('/user_profile',methods=['GET','POST'])
 def user_profile():
@@ -223,7 +223,7 @@ def admin():
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
-    return render_template('book.html',book=book)
+    return render_template('book.html', book=book)
     
 
 @app.route('/user_books')
@@ -367,6 +367,11 @@ def addbook():
         db.session.commit()
 
     return render_template('addbook.html')
+	
+@app.route('/author', methods=['GET','POST'])
+def author_page():
+    
+    return render_template('author.html')
 
 
 if __name__ == '__main__':
