@@ -60,8 +60,11 @@ CREATE TABLE `book` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `book` (`id`, `image_path`, `title`, `description`, `price`) VALUES
-(1, 'https://github.com/GustavoPT/GeekTextImages/blob/master/cover_gameofthrones01.jpg?raw=true', 'A Game of Thrones', 'A Game of Thrones is the first novel in A Song of Ice and Fire, a series of fantasy novels', '19.99');
-
+(1, 'https://github.com/GustavoPT/GeekTextImages/blob/master/cover_gameofthrones01.jpg?raw=true', 'A Game of Thrones', 'A Game of Thrones is the first novel in A Song of Ice and Fire, a series of fantasy novels', '19.99'),
+(2, 'https://github.com/GustavoPT/GeekTextImages/blob/master/HP_SS.jpg?raw=true','Harry Potter and the Sorcerer''s Stone', 'Harry finds himself drawn deep inside a mystical world he never knew existed and closer to his own noble destiny.','9.99'),
+(3, 'https://github.com/GustavoPT/GeekTextImages/blob/master/BNW.jpg?raw=true','Brave New World','masterpiece ... one of the most prophetic dystopian works of the 20th century.','14.99'),
+(4, 'https://github.com/GustavoPT/GeekTextImages/blob/master/TFotR.jpg?raw=true','The Fellowship of the Ring','The first volume in J.R.R. Tolkien''s epic adventure THE LORD OF THE RINGS', '11.99'),
+(5, 'https://github.com/GustavoPT/GeekTextImages/blob/master/EAP.jpg?raw=true','Edgar Allan Poe: Complete Tales and Poems','His complete early and miscellaneous poetic masterpieces.', '10.99');
 
 -- --------------------------------------------------------
 

@@ -367,6 +367,11 @@ def addbook():
         db.session.commit()
 
     return render_template('addbook.html')
+	
+@app.route('/author', methods=['GET','POST'])
+def author_page():
+    
+    return render_template('author.html')
 
 
 if __name__ == '__main__':
