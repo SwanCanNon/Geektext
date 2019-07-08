@@ -1,0 +1,29 @@
+# @app.route('/logout')
+# def logout():
+#     session.pop('user',None)
+#     flash("You have been logged out",'success')
+#     return render_template('books.html')
+
+# @app.route('/login',methods=['GET','POST'])
+# def login():
+#     form = LoginForm()
+#     # session.pop('user',None)
+
+#     if 'user' in session:
+#         return redirect(url_for(index))
+
+#     if request.method == 'POST':
+        
+#         username = request.form['name']
+#         password = request.form['password']
+#         exists = db.session.query(User.id).filter_by(name=username,password=password).scalar() is not None
+#         if exists == True: 
+#             # username and password found now they will be logged in 
+#             session['user'] = request.form['name']
+#             flash("You are now logged in",'success')
+#             return redirect(url_for('books'))
+
+#         else:          
+#             flash("That username could not be found/password/username are incorrect",'error')
+#             return redirect(url_for("login"))
+#     return render_template('login.html',form=form)

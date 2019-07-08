@@ -12,8 +12,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
 db = SQLAlchemy(app)
@@ -60,21 +60,23 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(128))
     password = db.Column(db.String(128))
     books = db.relationship('Book',secondary=book_copies,backref=db.backref('users',lazy='dynamic'))
-    user_cards = db.relationship('User_Cards',backref='user')
-    user_shippings = db.relationship('User_Shippings',backref='user')
+    user_cards = db.relationship('UserCard',backref='user')
+    user_shippings = db.relationship('UserShipping',backref='user')
     def __str__(self):
         return self.name
 
-class User_Cards(db.Model):
-    UserID = db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True)
-    CreditCardNum = db.Column(db.Integer,primary_key=True)
+class UserCard(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    UserID = db.Column(db.Integer,db.ForeignKey('user.id'))
+    CreditCardNum = db.Column(db.Integer)
     ExpMonth = db.Column(db.Integer)
     ExpYear = db.Column(db.Integer)
     CVS = db.Column(db.Integer)
     NameOnCard = db.Column(db.String(128))
 
-class User_Shippings(db.Model):
-    UserID = db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True)
+class UserShipping(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    UserID = db.Column(db.Integer,db.ForeignKey('user.id'))
     ShippingAddr = db.Column(db.String(128))
     ShippingCity = db.Column(db.String(128))
     ShippingState = db.Column(db.String(128))
@@ -115,6 +117,7 @@ class Saveforlater(db.Model):
         return f"{book.title}"
 
 @app.route('/',methods=['GET','POST'])
+
 @app.route('/books',methods=['GET','POST'])
 def index():
     books = Book.query.all()
@@ -125,30 +128,6 @@ def index():
         print(book.description)
         print(book.price)
     return render_template('books.html',books=books)
-
-# @app.route('/login',methods=['GET','POST'])
-# def login():
-#     form = LoginForm()
-#     # session.pop('user',None)
-
-#     if 'user' in session:
-#         return redirect(url_for(index))
-
-#     if request.method == 'POST':
-        
-#         username = request.form['name']
-#         password = request.form['password']
-#         exists = db.session.query(User.id).filter_by(name=username,password=password).scalar() is not None
-#         if exists == True: 
-#             # username and password found now they will be logged in 
-#             session['user'] = request.form['name']
-#             flash("You are now logged in",'success')
-#             return redirect(url_for('books'))
-
-#         else:          
-#             flash("That username could not be found/password/username are incorrect",'error')
-#             return redirect(url_for("login"))
-#     return render_template('login.html',form=form)
 
 
 @app.route('/login',methods=['GET','POST'])
@@ -166,12 +145,6 @@ def login():
             flash("That username could not be found/password/username are incorrect",'error')
     return render_template('login.html', title='Login', form=form)
 
-
-# @app.route('/logout')
-# def logout():
-#     session.pop('user',None)
-#     flash("You have been logged out",'success')
-#     return render_template('books.html')
 
 @app.route("/logout")
 def logout():
@@ -218,33 +191,56 @@ def user_profile():
     if request.method == "POST":
         request.form['name']
         request.form['email']
-        request.form['home_address']
-        request.form['physical_address']
-        request.form['creditcard_number']
+        # request.form['home_address']
+        # request.form['physical_address']
+        # request.form['creditcard_number']
 
-
+    if current_user.is_authenticated():
+        current_user_id = current_user.get_id()
+        current_user = User.query.filter_by(id=current_user_id).first()
+        current_user_shippings = current_user.user_shippings
+        current_user_cards = current_user.user_cards
     # query for the active users credit cards 
     # query for the active users 
-
 
     
     return render_template('user_profile.html')
 
-@app.route('/add_credit_card',methods=['GET','POST'])
-def add_credit_card():
+# @app.route('/add_credit_card',methods=['GET','POST'])
+# def add_credit_card():
 
-    if request.method == 'POST':
+#     # if request.method == 'POST':
+#     #     pass
+#     # else:
+
+#     return redirect(url_for('user_profile'))
 
 
-    return redirect(url_for('user_profile'))
+# @app.route('/user_profile/edit_user_card',methods=['GET','POST'])
+# def edit_user_card():
 
-@app.route('/add_shipping_address',methods=['GET','POST'])
-def add_credit_card():
+#     if request.method == 'POST':
+#         pass 
+#     else:
 
-    if request.method == 'POST':
-        
+#     return render_template('edit_user_card.html')
 
-    return redirect(url_for('user_profile'))
+# @app.route('/add_shipping_address',methods=['GET','POST'])
+# def add_credit_card():
+#     # if request.method == 'POST':
+#     #     pass 
+
+#     return redirect(url_for('user_profile'))
+
+
+# @app.route('/user_profile/edit_user_shipping',methods=['GET','POST'])
+# def edit_user_card():
+
+#     if request.method == 'POST':
+#         pass 
+#     else:
+
+#     return render_template('edit_user_shipping.html')
 
 @app.route('/admin',methods=['GET'])
 def admin():
@@ -256,7 +252,7 @@ def admin():
 def book(id):
     book = Book.query.filter_by(id=id).first()
     return render_template('book.html', book=book)
-    
+  
 
 @app.route('/user_books')
 def user_books(id):
@@ -289,7 +285,6 @@ def add_to_cart(book_id):
     db.session.commit()
    
     return redirect(url_for('books'))
-
 
 @app.route('/save_for_later/<int:book_id>')
 def save_for_later(book_id):
@@ -404,7 +399,6 @@ def addbook():
 def author_page():
     
     return render_template('author.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
