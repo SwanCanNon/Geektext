@@ -11,8 +11,8 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
 db = SQLAlchemy(app)
@@ -85,6 +85,7 @@ class Book(db.Model):
     title = db.Column(db.String(128))
     description = db.Column(db.String(128))
     price = db.Column(db.Float)
+    authorName = db.Column(db.String(50))
 
     def __str__(self):
         return f"{self.title}"
@@ -151,7 +152,7 @@ def login():
 def logout():
     logout_user()
     flash("You have been logged out",'success')
-    return render_template('books.html')
+    return redirect(url_for('index'))
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -306,8 +307,9 @@ def add_to_cart(book_id):
     book = Cart(user_id=user_id,book_id=book_id,quantity=1)
     db.session.add(book)
     db.session.commit()
-   
-    return redirect(url_for('books'))
+	
+    flash('Book added to cart','success')
+    return redirect(url_for('index'))
 
 @app.route('/save_for_later/<int:book_id>')
 def save_for_later(book_id):
