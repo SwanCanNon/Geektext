@@ -28,6 +28,14 @@
                                     <br>
                                     <br>
                                     <p>Shipping Addresses</p>
+                                    {% for user_shipping in user_shippings %}
+                                        <h1>{{user_shipping.ShippingAddr}}</h1>
+                                        
+                                        <button><a href="{{ url_for('edit_shipping_address', id=user_shipping.id) }}">Edit</a></button>
+                                        <button><a href="{{ url_for('delete_shipping_address', id=user_shipping.id) }}">Delete</a></button>
+                                    {% endfor %}
+                                    
+                                    <button><a href="/add_shipping_address">Add Shipping address</a></button>
                                     <ul>
                                         <li>
                                             <input type="text" placeholder="Shipping Adress 1" class="form-control">
@@ -36,15 +44,21 @@
                                         <li>
                                             <input type="text" placeholder="Shipping Adress 2" class="form-control">
                                         </li>
-                                    </ul>    
+                                    </ul>  
+                                    <button type="submit">Update User Information</button>  
                             </div>
                         </div>
                 </div>
             </div>
 
             <br>
+
             <h3 style="text-align: center">Credit Cards</h5>
 
+            {% for user_card in user_cards %}
+                <h1>{{user_card.NameOnCard}}</h1>
+            {% endfor %}
+            <button class="btn btn-primary"><a href="/add_credit_card">Add Credit Card</a></button>
             <div class="row">
                     <div class="col-md-4">
                         <div class="card" style="width: 18rem;">

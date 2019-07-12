@@ -1,0 +1,16 @@
+{% extends 'layout.html'%}
+
+{% block body %}
+
+<form action="/edit_user_card" method="POST">
+    <input type="text" name="" value="{{ }}">
+    <input type="text" name=""  value="{{user_card.UserID }}">
+    <input type="text" name=""  value="{{user_card.CreditCardNume }}">
+    <input type="text" name=""  value="{{user_card.ExpMonth }}">
+    <input type="text" name="" value="{{user_card.ExpYear }}">
+    <input type="text" name=""value="{{user_card.CVS }}">
+    <input type="text" name="" value="{{user_card.NameOnCard }}">
+    <button type="submit">submit</button>
+</form>
+
+{% endblock %}
