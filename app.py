@@ -152,7 +152,7 @@ def login():
 def logout():
     logout_user()
     flash("You have been logged out",'success')
-    return render_template('books.html')
+    return redirect(url_for('index'))
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -307,9 +307,9 @@ def add_to_cart(book_id):
     book = Cart(user_id=user_id,book_id=book_id,quantity=1)
     db.session.add(book)
     db.session.commit()
-   
-    #return redirect(url_for('books'))
-    return render_template('book.html', books=books)
+	
+    flash('Book added to cart','success')
+    return redirect(url_for('index'))
 
 @app.route('/save_for_later/<int:book_id>')
 def save_for_later(book_id):
