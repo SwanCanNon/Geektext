@@ -11,7 +11,7 @@
 				<div class="card-body">
 					<h4 class="card-title text-center">{{book.title}}</h4>
 					<h5 class="card-subtitle mb-1 text-center"><a href="{{ url_for('author_page') }}">{{book.authorName}}</a></h5>
-					<h6 class="card-subtitle mb-1 text-muted text-center">Book Genre</h6>
+					<h6 class="card-subtitle mb-1 text-muted text-center">{{ book.genre }}</h6>
 					<div class="text-center">
 						<img id="myImg" class="img-thumbnail" src ="{{ book.image_path }}" alt="Book Image" style="width:100%;max-width:300px">
 						<!-- The Modal -->
@@ -71,7 +71,18 @@
 			</div>
 		</div>
 		<div class="col-sm-6 align-self-center">
-			<p class="card-text">{{ book.description }}</p>
+			<div class="row">
+				<p class="card-text">{{ book.description }}</p>
+			</div>
+			
+			<div class="row">
+				<p>About The Author</p>
+				<p>{{author.AuthorBio}}</p>
+			</div>
+			
+			
+			<div class="row">
+				<p> Publisher : {{ book.publisher }}</p>
 		</div>
 	</div>
 </div>

@@ -86,9 +86,16 @@ class Book(db.Model):
     description = db.Column(db.String(128))
     price = db.Column(db.Float)
     authorName = db.Column(db.String(50))
+    publisher = db.Column(db.String(128))
+    genre = db.Column(db.String(32))
 
     def __str__(self):
         return f"{self.title}"
+		
+class Authors(db.Model):
+    AuthorID = db.Column(db.Integer, primary_key=True)
+    AuthorName = db.Column(db.String(50))
+    AuthorBio = db.Column(db.String(10000))
 
 class Category(db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -122,6 +129,13 @@ def real_index():
 @app.route('/books',methods=['GET','POST'])
 def index():
     books = Book.query.all()
+    authors = Authors.query.all()
+    print(authors)
+    for author in authors:
+        print(author.AuthorID)
+        print(author.AuthorName)
+        print(author.AuthorBio)
+
     print(books)
 
     for book in books:
@@ -291,7 +305,8 @@ def delete_user_shipping(id):
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
-    return render_template('book.html', book=book)
+    author = Authors.query.filter_by(AuthorName=book.authorName)
+    return render_template('book.html', book=book, author=author)
  
 @app.route('/user_books/<int:id>')
 def user_book(id):
