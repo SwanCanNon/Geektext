@@ -11,8 +11,8 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
 db = SQLAlchemy(app)
@@ -308,7 +308,8 @@ def add_to_cart(book_id):
     db.session.add(book)
     db.session.commit()
    
-    return redirect(url_for('books'))
+    #return redirect(url_for('books'))
+    return render_template('book.html', books=books)
 
 @app.route('/save_for_later/<int:book_id>')
 def save_for_later(book_id):
