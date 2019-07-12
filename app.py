@@ -70,6 +70,7 @@ class Book(db.Model):
     title = db.Column(db.String(128))
     description = db.Column(db.String(128))
     price = db.Column(db.Float)
+    authorName = db.Column(db.String(50))
 
     def __str__(self):
         return f"{self.title}"

@@ -39,7 +39,7 @@ CREATE TABLE `authors` (
 --
 
 INSERT INTO `authors` (`AuthorID`, `AuthorName`, `AuthorBio`) VALUES
-(1, 'George R Martin', 'Born in 1948, fantasy writer George R. R. Martin grew up in Bayonne, New Jersey. He developed a love for writing early on. His first novel, Dying of the Light, debuted in 1977. In 1996, he published his first installment of the A Song of Ice and Fire series. Martin became a best-selling author in 2005 with the fourth title A Feast for Crows and again in 2011 with the fifth A Dance with Dragons.'),
+(1, 'George R. R. Martin', 'Born in 1948, fantasy writer George R. R. Martin grew up in Bayonne, New Jersey. He developed a love for writing early on. His first novel, Dying of the Light, debuted in 1977. In 1996, he published his first installment of the A Song of Ice and Fire series. Martin became a best-selling author in 2005 with the fourth title A Feast for Crows and again in 2011 with the fifth A Dance with Dragons.'),
 (2, 'J. K. Rowling', 'Joanne Rowling, writing under the pen names J. K. Rowling and Robert Galbraith, is a British novelist, philanthropist, film and television producer and screenwriter best known for writing the Harry Potter fantasy series.'),
 (3, 'Aldous Huxley', 'Aldous Leonard Huxley was an English writer, novelist, philosopher, and prominent member of the Huxley family. He graduated from Balliol College at the University of Oxford with a first-class honours degree in English literature. The author of nearly fifty books, Huxley was best known for his novels (among them Brave New World, set in a dystopian future); for nonfiction works, such as The Doors of Perception, in which he recalls his experiences taking psychedelic drugs; and for his wide-ranging essays. Early in his career, Huxley published short stories and poetry, and edited the literary magazine Oxford Poetry. He went on to publish travel writing, film stories, satire, and screenplays. He spent the latter part of his life in the United States, living in Los Angeles from 1937 until his death.'),
 (4, 'J. R. R. Tolkien', 'John Ronald Reuel Tolkien was an English writer, poet, philologist, and university professor who is best known as the author of the classic high fantasy works The Hobbit, The Lord of the Rings, and The Silmarillion.'),
@@ -76,6 +76,7 @@ CREATE TABLE `books` (
   `BookID` int(11) NOT NULL,
   `BookTitle` varchar(255) DEFAULT NULL,
   `BookDescription` varchar(10000) DEFAULT NULL,
+  `AuthorID` int(11) DEFAULT NULL,
   `AuthorID` int(11) DEFAULT NULL,
   `PublisherID` int(11) DEFAULT NULL,
   `ReleaseDate` date DEFAULT NULL,
