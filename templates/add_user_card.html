@@ -1,0 +1,14 @@
+{% extends 'layout.html'%}
+
+{% block body %}
+
+<form action="/add_user_card" method="POST">
+    <input type="text" name="CreditCardName">
+    <input type="text" name="ExpMonth" >
+    <input type="text" name="ExpYear" >
+    <input type="text" name="CVS">
+    <input type="text" name="NameOnCard" >
+    <button type="submit">submit</button>
+</form>
+
+{% endblock %}

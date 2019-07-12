@@ -27,3 +27,34 @@
 #             flash("That username could not be found/password/username are incorrect",'error')
 #             return redirect(url_for("login"))
 #     return render_template('login.html',form=form)
+
+
+# class LoginForm(FlaskForm):
+#     name = StringField('name',validators=[InputRequired(),Length(min=8,max=80)])
+#     password = PasswordField('password',validators=[InputRequired(),Length(min=8,max=60)])
+#     remember = BooleanField('remember me')
+#     submit   = SubmitField('Login')
+
+
+@app.route("/search",methods=["POST"])
+def search():
+    print(request.form['search'])
+    query = request.form['search']
+
+    # search thru all the books and find a book with the matching 
+    # book name and return it in the results 
+
+    return render_template("search_results.html",query=query)
+
+
+@app.route('/checkout',methods=['GET','POST'])
+def checkout():
+    if request.method == 'POST':
+        print("het")
+    else:
+        pass 
+    # query the db for the cart object 
+    # make a new transaction class 
+    # add transaction to the database 
+
+    return render_template('checkout.html')

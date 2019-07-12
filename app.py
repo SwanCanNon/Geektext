@@ -4,14 +4,13 @@ from flask_migrate import Migrate
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators,SubmitField 
 from wtforms.validators import InputRequired,Email,Length,DataRequired
-from flask_login import LoginManager,current_user,login_user,UserMixin,logout_user
+from flask_login import LoginManager,login_user,UserMixin,logout_user,login_required,current_user
 import os
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
-
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
@@ -19,13 +18,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/gee
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
 
-
 book_copies = db.Table('book_copies',
     db.Column('user_id',db.Integer,db.ForeignKey('user.id')),
     db.Column('book_id',db.Integer,db.ForeignKey('book.id'))
 )
 
-login_manager = LoginManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -42,23 +41,21 @@ class RegistrationForm(FlaskForm):
     accept_tos = BooleanField('I accept the TOS',[validators.DataRequired])
     submit  = SubmitField('Sign up')
 
-# class LoginForm(FlaskForm):
-#     name = StringField('name',validators=[InputRequired(),Length(min=8,max=80)])
-#     password = PasswordField('password',validators=[InputRequired(),Length(min=8,max=60)])
-#     remember = BooleanField('remember me')
-#     submit   = SubmitField('Login')
-
 class LoginForm(FlaskForm):
     name = StringField('name',validators=[DataRequired(),Length(min=4,max=80)])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+# password need to have uppercase 
+# lowercase 
+# special character
+# email needs to have the at 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     email = db.Column(db.String(128))
-    password = db.Column(db.String(128))
+    password = db.Column(db.String(128)) 
     books = db.relationship('Book',secondary=book_copies,backref=db.backref('users',lazy='dynamic'))
     user_cards = db.relationship('UserCard',backref='user')
     user_shippings = db.relationship('UserShipping',backref='user')
@@ -117,6 +114,9 @@ class Saveforlater(db.Model):
         return f"{book.title}"
 
 @app.route('/',methods=['GET','POST'])
+def real_index():
+    return redirect(url_for('index'))
+
 
 @app.route('/books',methods=['GET','POST'])
 def index():
@@ -129,22 +129,23 @@ def index():
         print(book.price)
     return render_template('books.html',books=books)
 
-
 @app.route('/login',methods=['GET','POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(name=form.name.data).first()
-        if user and (user.password == form.password.data):
-            login_user(user, remember=form.remember.data)
-            flash("You are now logged in",'success')
-            return redirect(url_for('index'))
-        else:
-            flash("That username could not be found/password/username are incorrect",'error')
-    return render_template('login.html', title='Login', form=form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = User.query.filter_by(name=form.name.data).first()
+            if user and (user.password == form.password.data):
+                login_user(user, remember=form.remember.data)
+                print(current_user.name)
+                flash("You are now logged in",'success')
+                return redirect(url_for('index'))
+            else:
+                flash("That username could not be found/password/username are incorrect",'error')
 
+    return render_template('login.html', title='Login', form=form)
 
 @app.route("/logout")
 def logout():
@@ -185,90 +186,112 @@ def register():
 
     return render_template('register.html',form=form)
 
-# @login_manager.user_loader
 @app.route('/user_profile',methods=['GET','POST'])
+@login_required
 def user_profile():
-    if request.method == "POST":
-        request.form['name']
-        request.form['email']
-        # request.form['home_address']
-        # request.form['physical_address']
-        # request.form['creditcard_number']
-
-    if current_user.is_authenticated():
+    print("current user in user profile function " + current_user.name)
+    if current_user.is_authenticated:
         current_user_id = current_user.get_id()
         current_user = User.query.filter_by(id=current_user_id).first()
-        current_user_shippings = current_user.user_shippings
-        current_user_cards = current_user.user_cards
-    # query for the active users credit cards 
-    # query for the active users 
+        user_shippings = current_user.user_shippings
+        user_cards = current_user.user_cards
 
-    
-    return render_template('user_profile.html')
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        current_user.name = name 
+        current_user.email = email 
+        current_user.password = password 
+        db.session.commit()
+        flash('successfully updated','success')
+        return redirect(url_for('user_profile'))
 
-# @app.route('/add_credit_card',methods=['GET','POST'])
-# def add_credit_card():
+    return render_template('user_profile.html',user_shippings=user_shippings,user_cards=user_cards)
 
-#     # if request.method == 'POST':
-#     #     pass
-#     # else:
+@app.route('/add_user_card',methods=['GET','POST'])
+def add_user_card():
 
-#     return redirect(url_for('user_profile'))
+    if request.method == 'POST':
+        user_id = request.form['UserID']
+        credit_card_num = request.form['CreditCardNum']
+        expMonth = request.form['ExpMonth']
+        expYear  = request.form['ExpYear']
+        cvs      = request.form['CVS']
+        nameOnCard = request.form['NameOnCard']
+        new_card = UserCard(UserID=user_id,CreditCardNum=credit_card_num,ExpMonth=expMonth,ExpYear=expYear,CVS=cvs,NameOnCard=nameOnCard)
+        db.add(new_card)
+        db.commit()
+        flash('new card succesfully added','success')
+        return redirect(url_for('user_profile'))
 
-
-# @app.route('/user_profile/edit_user_card',methods=['GET','POST'])
-# def edit_user_card():
-
-#     if request.method == 'POST':
-#         pass 
-#     else:
-
-#     return render_template('edit_user_card.html')
-
-# @app.route('/add_shipping_address',methods=['GET','POST'])
-# def add_credit_card():
-#     # if request.method == 'POST':
-#     #     pass 
-
-#     return redirect(url_for('user_profile'))
+    return render_template('add_user_card.html')
 
 
-# @app.route('/user_profile/edit_user_shipping',methods=['GET','POST'])
-# def edit_user_card():
+@app.route('/add_user_shipping',methods=['GET','POST'])
+def add_user_shipping():
+    if request.method == 'POST':
+        UserID = request.form['UserID']
+        ShippingAddr = request.form['CreditCardNum']
+        ShippingCity = request.form['ExpMonth']
+        ShippingState = request.form['ExpYear']
+        ShippingZip   = request.form['CVS']
+        new_user_shipping = UserShipping(UserID=UserID,ShippingAddr=ShippingAddr,ShippingCity=ShippingCity,ShippingState=ShippingState,ShippingZip=ShippingZip)
+        db.add(new_user_shipping)
+        db.commit()
+        flash('new shipping succesfully added','success')
+        return redirect(url_for('user_profile'))
 
-#     if request.method == 'POST':
-#         pass 
-#     else:
+    return render_template('add_user_shipping.html')
 
-#     return render_template('edit_user_shipping.html')
+@app.route('/user_profile/edit_user_card/<int:id>',methods=['GET','POST'])
+def edit_user_card(id):
+    user_card = UserCard.query.filter_by(id=id)
+    if request.method == 'POST':
+         user_card.UserID = request.form['UserID']
+         user_card.CreditCardNum = request.form['CreditCardNum']
+         user_card.ExpMonth = request.form['ExpMonth']
+         user_card.ExpYear  = request.form['ExpYear']
+         user_card.CVS      = request.form['CVS']
+         user_card.NameOnCard = request.form['NameOnCard']
+         db.session.commit()
+         flash('Edited Card successfully','success')
+    return render_template('edit_user_card.html',user_card=user_card)
 
-@app.route('/admin',methods=['GET'])
-def admin():
+@app.route('/user_profile/edit_user_shipping/<int:id>',methods=['GET','POST'])
+def edit_user_shipping(id):
+    user_shipping = UserShipping.query.filter_by(id=id)
+    if request.method == 'POST':
+         user_shipping.UserID = request.form['UserID']
+         user_shipping.ShippingAddr = request.form['CreditCardNum']
+         user_shipping.ShippingCity = request.form['ExpMonth']
+         user_shipping.ShippingState = request.form['ExpYear']
+         user_shipping.ShippingZip   = request.form['CVS']
 
-    return render_template('admin.html')
+    return render_template('edit_user_shipping.html',user_shipping=user_shipping)
+
+
+@app.route('/user_profile/delete_user_card/<int:id>',methods=['GET','POST'])
+def delete_user_card(id):
+    user_card = UserCard.query.filter_by(id=id)
+    db.session.delete(user_card)
+    flash('Successfully deleted','success')
+    return redirect(url_for('user_profile'))
+
+
+@app.route('/user_profile/delete_user_shipping/<int:id>',methods=['GET','POST'])
+def delete_user_shipping(id):
+    user_shipping = UserShipping.query.filter_by(id=id)
+    db.session.delete(user_shipping)
+    flash('Successfully deleted','success')
+    return redirect(url_for('user_profile'))
 
 # book edit view 
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
     return render_template('book.html', book=book)
-  
-
-@app.route('/user_books')
-def user_books(id):
-    # check all books with the ide of the specified user
-    return render_template('user_books.html')
-
-@app.route("/search",methods=["POST"])
-def search():
-    print(request.form['search'])
-    query = request.form['search']
-
-    # search thru all the books and find a book with the matching 
-    # book name and return it in the results 
-
-    return render_template("search_results.html",query=query)
-
+ 
 @app.route('/user_books/<int:id>')
 def user_book(id):
     # check book with the id that belongs to the user
@@ -331,18 +354,6 @@ def cart():
     total_saved_books = len(all_saved_books)
 
     return render_template('cart.html',total_price=total_price,books=user_books,saved_books=saved_books,saved_books_price=saved_books_price,cart_books=cart_books,total_saved_books=total_saved_books)
-
-@app.route('/checkout',methods=['GET','POST'])
-def checkout():
-    if request.method == 'POST':
-        print("het")
-    else:
-        pass 
-    # query the db for the cart object 
-    # make a new transaction class 
-    # add transaction to the database 
-
-    return render_template('checkout.html')
 
 @app.route('/delete_book/<int:book_id>')
 def delete_book(book_id):
