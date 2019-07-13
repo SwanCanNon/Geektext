@@ -305,7 +305,7 @@ def delete_user_shipping(id):
 @app.route('/book/<int:id>')
 def book(id):
     book = Book.query.filter_by(id=id).first()
-    author = Authors.query.filter_by(AuthorName=book.authorName)
+    author = Authors.query.filter_by(AuthorName=book.authorName).first()
     return render_template('book.html', book=book, author=author)
  
 @app.route('/user_books/<int:id>')
