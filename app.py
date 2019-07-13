@@ -429,11 +429,22 @@ def addbook():
         db.session.commit()
 
     return render_template('addbook.html')
-	
+
+
 @app.route('/author', methods=['GET','POST'])
 def author_page():
-    
     return render_template('author.html')
+
+
+@app.route('/comments', methods=['GET','POST'])
+def comments():
+    return render_template('comments.html')
+
+
+@app.route('/rating', methods=['GET','POST'])
+def star_rating():
+    return render_template('star_rating.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Star Rating</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <link rel="stylesheet" href="../static/css/StarRating.css">
+        <link rel="stylesheet" href="//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    </head>
+    <body>
+        <x-star-rating value="3" number="5" id="rating"></x-star-rating>
+        <script src="../static/js/StarRating.js"></script>
+        <script>
+            rating.addEventListener('rate', () => {
+                console.log(rating.value);
+            });
+        </script>
+    </body>
+</html>
