@@ -1,13 +1,18 @@
 {% extends 'layout.html'%}
 
 {% block body %}
-
+<h1>Add Shipping Address</h1>
 <form action="/add_user_shipping" method="POST">
-    <input type="text" name="ShippingAddr" value="{{user_shipping.ShippingAddr }}">
-    <input type="text" name="ShippingCity" value="{{user_card.ShippingCity }}">
-    <input type="text" name="ShippingState" value="{{user_shipping.ShippingState }}">
-    <input type="text" name="ShippingZip" value="{{user_shipping.ShippingZip }}">
-    <button type="submit">submit</button>
+    <input type="text" name="ShippingAddr" class="form form-control" placeholder="Shipping Address" value="">
+    <br>
+    <input type="text" name="ShippingCity" class="form form-control" placeholder="Shipping City" value="">
+    <br>
+    <input type="text" name="ShippingState" class="form form-control" placeholder="Shipping State"  value="">
+    <br>
+    <input type="text" name="ShippingZip" class="form form-control" placeholder="Shipping Zip"  value="">
+    <br>
+    <br>
+    <button class="btn btn-primary" type="submit">submit</button>
 </form>
 
 {% endblock %}

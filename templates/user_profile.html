@@ -4,17 +4,17 @@
 
     
     
-    <form action="/userprofile" method="POST">
+    <form action="/user_profile" method="POST">
         <div class="row">
                 <div class="col-md-12">
                         <div class="card" style="width: 60rem;">
                             <div class="card-body">
                                     <h1>User Profile</h1>
-                                    <label for="name" class="form-control">Name:</label>
+                                    <label for="name" >Name:</label>
                                     <br>
                                     <input name="name"type="text" class="form-control" value="{{current_user.name}}">
                                     <br>
-                                    <label for="email" class="form-control">Email:</label>
+                                    <label for="email" >Email:</label>
                                     <br>
                                     <input name="email" class="form-control" type="text" value="{{current_user.email}}">
                                     <br>
@@ -24,27 +24,10 @@
                                     <br>
                                     <label for="physical_address" class="">Physical Address</label>
                                     <br>
-                                    <input name="physical_address" class="form-control" type="text" placeholder="Physical address">
+                                    <input name="physical_address" class="form-control" type="text" placeholder="{{current_user.physical_address}}">
                                     <br>
                                     <br>
-                                    <p>Shipping Addresses</p>
-                                    {% for user_shipping in user_shippings %}
-                                        <h1>{{user_shipping.ShippingAddr}}</h1>
-                                        
-                                        <button><a href="{{ url_for('edit_shipping_address', id=user_shipping.id) }}">Edit</a></button>
-                                        <button><a href="{{ url_for('delete_shipping_address', id=user_shipping.id) }}">Delete</a></button>
-                                    {% endfor %}
-                                    
-                                    <button><a href="/add_shipping_address">Add Shipping address</a></button>
-                                    <ul>
-                                        <li>
-                                            <input type="text" placeholder="Shipping Adress 1" class="form-control">
-                                        </li>
-                                        <br>
-                                        <li>
-                                            <input type="text" placeholder="Shipping Adress 2" class="form-control">
-                                        </li>
-                                    </ul>  
+
                                     <button type="submit">Update User Information</button>  
                             </div>
                         </div>
@@ -52,85 +35,64 @@
             </div>
 
             <br>
-
-            <h3 style="text-align: center">Credit Cards</h5>
-
-            {% for user_card in user_cards %}
-                <h1>{{user_card.NameOnCard}}</h1>
+            <h1 style="">Shipping Addresses</h1>
+            <button ><a href="/add_user_shipping">Add Shipping address</a></button>
+            <br>
+            <br>
+            <ul>
+            {% for user_shipping in user_shippings %}
+                <li>
+                    <input type="text" placeholder="{{user_shipping.ShippingAddr}}" class="form-control">
+                    
+                    <br>
+                    <button><a href="{{ url_for('edit_user_shipping', id=user_shipping.id) }}">Edit</a></button>
+                    <button><a href="{{ url_for('delete_user_shipping', id=user_shipping.id) }}">Delete</a></button>
+                    <br>
+                    <br>
+                </li>
             {% endfor %}
-            <button class="btn btn-primary"><a href="/add_credit_card">Add Credit Card</a></button>
+            </ul>
+
+            
+
+            <h1>Credit Cards</h5>
             <div class="row">
+                {% for user_card in user_cards %}
                     <div class="col-md-4">
                         <div class="card" style="width: 18rem;">
                             <div class="card-body">
-                                <h5 class="card-title">Credit Card title</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                <input class="card-title" type="text"placeholder="Credit card name">
+                                Name On Card:
+                                <h5 class="card-title">{{user_card.NameOnCard}}</h5>
+                                <br>
+                                CreditCardNum:
+                                <input type="text" placeholder="{{user_card.CreditCardNum}}">
                                 <br>
                                 <br>
-                                <input type="text" placeholder="Credit Card #">
+                                Exp Month
+                                <input type="text" placeholder="{{user_card.ExpMonth}}">
                                 <br>
                                 <br>
-                                <input type="text" placeholder="exp year">
+                                Exp Year
+                                <br>
+                                <input type="text" placeholder="{{user_card.ExpYear}}">
                                 <br>
                                 <br>
-                                <input type="text" placeholder="exp month">
+                                CVS
                                 <br>
-                                <br>
-                                <input type="password" placeholder="CVS">
+                                <input type="text" placeholder="{{user_card.CVS}}">                <br>  
+                                <br>           
+                                <button><a href="{{ url_for('edit_user_card', id=user_card.id) }}">Edit</a></button>
+                                <button><a href="{{ url_for('delete_user_card', id=user_card.id) }}">Delete</a></button>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                            <div class="card" style="width: 18rem;">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Credit Card title</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                        <input class="card-title" type="text"placeholder="Credit card name">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="Credit Card #">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="exp year">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="exp month">
-                                        <br>
-                                        <br>
-                                        <input type="password" placeholder="CVS">
-                                    </div>
-                                </div>
-                    </div>
-                    <div class="col-md-4">
-                            <div class="card" style="width: 18rem;">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Credit Card title</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                        <input class="card-title" type="text"placeholder="Credit card name">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="Credit Card #">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="exp year">
-                                        <br>
-                                        <br>
-                                        <input type="text" placeholder="exp month">
-                                        <br>
-                                        <br>
-                                        <input type="password" placeholder="CVS">
-                                    </div>
-                                </div>
-                    </div>
-                </div>
-            <br>
-            <br>
-            <input type="submit" class="btn btn-primary" value="Update information">
+                {% endfor %}
+            </div>
 
+ 
             <br>
+            <br>
+            <button><a class="btn" href="/add_user_card">Add Card</a></button>
+            
     </form>
 {% endblock %}

@@ -11,8 +11,8 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
 db = SQLAlchemy(app)
@@ -47,10 +47,6 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-# password need to have uppercase 
-# lowercase 
-# special character
-# email needs to have the at 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -59,6 +55,7 @@ class User(db.Model, UserMixin):
     books = db.relationship('Book',secondary=book_copies,backref=db.backref('users',lazy='dynamic'))
     user_cards = db.relationship('UserCard',backref='user')
     user_shippings = db.relationship('UserShipping',backref='user')
+    physical_address = db.Column(db.String(128))
     def __str__(self):
         return self.name
 
@@ -206,18 +203,25 @@ def register():
 def user_profile():
     print("current user in user profile function " + current_user.name)
     if current_user.is_authenticated:
-        current_user_id = current_user.get_id()
-        current_user = User.query.filter_by(id=current_user_id).first()
+        # current_user_id = current_user.get_id()
+        # current_user = User.query.filter_by(id=current_user_id).first()
         user_shippings = current_user.user_shippings
         user_cards = current_user.user_cards
 
     if request.method == 'POST':
+        user_db = User.query.filter_by(id=current_user.id).first()
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        physical_address = request.form['physical_address']
         current_user.name = name 
         current_user.email = email 
         current_user.password = password 
+        current_user.physical_address = physical_address
+        user_db.name = name 
+        user_db.email = email 
+        user_db.password = password 
+        user_db.physical_address = physical_address
         db.session.commit()
         flash('successfully updated','success')
         return redirect(url_for('user_profile'))
@@ -228,15 +232,15 @@ def user_profile():
 def add_user_card():
 
     if request.method == 'POST':
-        user_id = request.form['UserID']
+        user_id = 1
         credit_card_num = request.form['CreditCardNum']
         expMonth = request.form['ExpMonth']
         expYear  = request.form['ExpYear']
         cvs      = request.form['CVS']
         nameOnCard = request.form['NameOnCard']
         new_card = UserCard(UserID=user_id,CreditCardNum=credit_card_num,ExpMonth=expMonth,ExpYear=expYear,CVS=cvs,NameOnCard=nameOnCard)
-        db.add(new_card)
-        db.commit()
+        db.session.add(new_card)
+        db.session.commit()
         flash('new card succesfully added','success')
         return redirect(url_for('user_profile'))
 
@@ -246,14 +250,14 @@ def add_user_card():
 @app.route('/add_user_shipping',methods=['GET','POST'])
 def add_user_shipping():
     if request.method == 'POST':
-        UserID = request.form['UserID']
-        ShippingAddr = request.form['CreditCardNum']
-        ShippingCity = request.form['ExpMonth']
-        ShippingState = request.form['ExpYear']
-        ShippingZip   = request.form['CVS']
+        UserID = 1
+        ShippingAddr = request.form['ShippingAddr']
+        ShippingCity = request.form['ShippingCity']
+        ShippingState = request.form['ShippingState']
+        ShippingZip   = request.form['ShippingZip']
         new_user_shipping = UserShipping(UserID=UserID,ShippingAddr=ShippingAddr,ShippingCity=ShippingCity,ShippingState=ShippingState,ShippingZip=ShippingZip)
-        db.add(new_user_shipping)
-        db.commit()
+        db.session.add(new_user_shipping)
+        db.session.commit()
         flash('new shipping succesfully added','success')
         return redirect(url_for('user_profile'))
 
@@ -261,9 +265,9 @@ def add_user_shipping():
 
 @app.route('/user_profile/edit_user_card/<int:id>',methods=['GET','POST'])
 def edit_user_card(id):
-    user_card = UserCard.query.filter_by(id=id)
+    user_card = UserCard.query.filter_by(id=id).first()
     if request.method == 'POST':
-         user_card.UserID = request.form['UserID']
+         user_card.UserID = current_user.id
          user_card.CreditCardNum = request.form['CreditCardNum']
          user_card.ExpMonth = request.form['ExpMonth']
          user_card.ExpYear  = request.form['ExpYear']
@@ -271,33 +275,40 @@ def edit_user_card(id):
          user_card.NameOnCard = request.form['NameOnCard']
          db.session.commit()
          flash('Edited Card successfully','success')
+         return redirect(url_for('user_profile'))
     return render_template('edit_user_card.html',user_card=user_card)
 
 @app.route('/user_profile/edit_user_shipping/<int:id>',methods=['GET','POST'])
 def edit_user_shipping(id):
-    user_shipping = UserShipping.query.filter_by(id=id)
+    user_shipping = UserShipping.query.filter_by(id=id).first()
     if request.method == 'POST':
-         user_shipping.UserID = request.form['UserID']
-         user_shipping.ShippingAddr = request.form['CreditCardNum']
-         user_shipping.ShippingCity = request.form['ExpMonth']
-         user_shipping.ShippingState = request.form['ExpYear']
-         user_shipping.ShippingZip   = request.form['CVS']
+         user_shipping.ShippingAddr = request.form['ShippingAddr']
+         user_shipping.ShippingCity = request.form['ShippingCity']
+         user_shipping.ShippingState = request.form['ShippingState']
+         user_shipping.ShippingZip   = request.form['ShippingZip']
+
+         db.session.commit()
+         flash('Successfully updated','success')
+         return redirect(url_for('user_profile'))
 
     return render_template('edit_user_shipping.html',user_shipping=user_shipping)
 
-
 @app.route('/user_profile/delete_user_card/<int:id>',methods=['GET','POST'])
 def delete_user_card(id):
-    user_card = UserCard.query.filter_by(id=id)
+    user_card = UserCard.query.filter_by(id=id).first()
     db.session.delete(user_card)
+    db.session.commit()
     flash('Successfully deleted','success')
     return redirect(url_for('user_profile'))
 
 
 @app.route('/user_profile/delete_user_shipping/<int:id>',methods=['GET','POST'])
 def delete_user_shipping(id):
-    user_shipping = UserShipping.query.filter_by(id=id)
+    print(id)
+    user_shipping = UserShipping.query.filter_by(id=id).first()
+    print(user_shipping)
     db.session.delete(user_shipping)
+    db.session.commit()
     flash('Successfully deleted','success')
     return redirect(url_for('user_profile'))
 
@@ -403,13 +414,6 @@ def move_to_cart(book_id):
    
     return redirect(url_for('cart'))
 
-@app.route('/success_checkout')
-def success_checkout():
-    # have a flash message sent to the user that the operation 
-    # was successful and a display of their transaction 
-    # maybe add a pdf 
-
-    return render_template('success_checkout')
 
 @app.route('/addbook',methods=['GET','POST'])
 def addbook():

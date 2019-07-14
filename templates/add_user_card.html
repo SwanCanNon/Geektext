@@ -1,14 +1,21 @@
 {% extends 'layout.html'%}
 
 {% block body %}
-
+<h1>Add Credit Card</h1>
 <form action="/add_user_card" method="POST">
-    <input type="text" name="CreditCardName">
-    <input type="text" name="ExpMonth" >
-    <input type="text" name="ExpYear" >
-    <input type="text" name="CVS">
-    <input type="text" name="NameOnCard" >
-    <button type="submit">submit</button>
+    <input type="text" name="NameOnCard" placeholder="Name On Card" class="form form-control">
+    <br>
+    <input type="text" name="CreditCardNum" placeholder="Credit Card Number" class="form form-control">
+    <br>
+    <input type="text" name="ExpMonth" placeholder="Exp Month" class="form form-control">
+    <br>
+    <input type="text" name="ExpYear" placeholder="Exp Year" class="form form-control">
+    <br>
+    <input type="text" name="CVS" placeholder="CVS" class="form form-control">
+    <br>
+
+    <br>
+    <button class="btn btn-primary" type="submit" >submit</button>
 </form>
 
 {% endblock %}
