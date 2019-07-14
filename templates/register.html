@@ -2,26 +2,28 @@
 
 {% block body %}
 <form action="/register" method="POST">
-    REGISTER 
+    <h1>REGISTER </h1>
     {{ form.csrf_token }}
     <br>
-    {{form.username.label(class="form-control-label")}}
+    Name 
     <br>
-    {{form.username()}}
+    {{form.username(class="form form-control")}}
     <br>
     Email 
     <br>
-    {{form.email}}
+    {{form.email(class="form form-control")}}
     <br>
     Password
     <br>
-    {{form.password}}
+    {{form.password(class="form form-control")}}
     <br>
     Confirm 
     <br>
-    {{form.confirm(value="Confirm")}}
+    {{form.confirm(value="Confirm",class="form form-control")}}
     <br>
     <br>
-    {{form.submit(class="btn-primary")}}
+    {{form.submit(class="btn btn-outline-info")}}
+    <br>
+    <br>
 </form>
 {% endblock %}

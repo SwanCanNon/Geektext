@@ -62,7 +62,7 @@ class User(db.Model, UserMixin):
 class UserCard(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     UserID = db.Column(db.Integer,db.ForeignKey('user.id'))
-    CreditCardNum = db.Column(db.Integer)
+    CreditCardNum = db.Column(db.String(128))
     ExpMonth = db.Column(db.Integer)
     ExpYear = db.Column(db.Integer)
     CVS = db.Column(db.Integer)
@@ -191,8 +191,11 @@ def register():
             # you are now registered 
             db.session.add(new_user) 
             db.session.commit()            
+
+            login_user(new_user)
             # redirect them to the homepage 
-            session['user'] = request.form['username']
+            # session['user'] = request.form['username']
+
             flash("You were successfully registered",'success')
             return redirect(url_for("index")) 
 
@@ -232,7 +235,7 @@ def user_profile():
 def add_user_card():
 
     if request.method == 'POST':
-        user_id = 1
+        user_id = current_user.id 
         credit_card_num = request.form['CreditCardNum']
         expMonth = request.form['ExpMonth']
         expYear  = request.form['ExpYear']

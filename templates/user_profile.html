@@ -28,7 +28,7 @@
                                     <br>
                                     <br>
 
-                                    <button type="submit">Update User Information</button>  
+                                    <button type="submit" class="btn btn-outline-info">Update User Information</button>  
                             </div>
                         </div>
                 </div>
@@ -36,22 +36,36 @@
 
             <br>
             <h1 style="">Shipping Addresses</h1>
-            <button ><a href="/add_user_shipping">Add Shipping address</a></button>
+            <button class="btn btn-outline-info" ><a href="/add_user_shipping">Add Shipping address</a></button>
             <br>
             <br>
-            <ul>
+
+           
             {% for user_shipping in user_shippings %}
-                <li>
-                    <input type="text" placeholder="{{user_shipping.ShippingAddr}}" class="form-control">
-                    
+               
+                <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                    <strong >Shipping Address: </strong>     {{user_shipping.ShippingAddr}}
                     <br>
-                    <button><a href="{{ url_for('edit_user_shipping', id=user_shipping.id) }}">Edit</a></button>
-                    <button><a href="{{ url_for('delete_user_shipping', id=user_shipping.id) }}">Delete</a></button>
+                    <!-- <input type="text" placeholder="{{user_shipping.ShippingAddr}}" class="form-control"> -->
+                      <strong>Shipping City:</strong>       {{user_shipping.ShippingCity}}
+                    <!-- <input type="text" placeholder="{{user_shipping.ShippingCity}}" class="form-control"> -->
+                    <br>
+                      <strong>Shipping State:</strong>        {{user_shipping.ShippingState}}
+                    <!-- <input type="text" placeholder="{{user_shipping.ShippingState}}" class="form-control"> -->
+                    <br>
+                      <strong>Shipping Zip:</strong>        {{user_shipping.ShippingZip}}
+                    <!-- <input type="text" placeholder="{{user_shipping.ShippingZip}}" class="form-control"> -->
                     <br>
                     <br>
-                </li>
+                    <button class="btn btn-outline-info"><a href="{{ url_for('edit_user_shipping', id=user_shipping.id) }}">Edit</a></button>
+                    <button class="btn btn-outline-danger"><a style="text-decoration:none;" href="{{ url_for('delete_user_shipping', id=user_shipping.id) }}">Delete</a></button>
+                    <br>
+                    <br>
+                </div>
+            </div>
             {% endfor %}
-            </ul>
+
 
             
 
@@ -81,8 +95,8 @@
                                 <br>
                                 <input type="text" placeholder="{{user_card.CVS}}">                <br>  
                                 <br>           
-                                <button><a href="{{ url_for('edit_user_card', id=user_card.id) }}">Edit</a></button>
-                                <button><a href="{{ url_for('delete_user_card', id=user_card.id) }}">Delete</a></button>
+                                <button class="btn btn-outline-info"><a href="{{ url_for('edit_user_card', id=user_card.id) }}">Edit</a></button>
+                                <button class="btn btn-outline-danger"><a style="text-decoration:none; " href="{{ url_for('delete_user_card', id=user_card.id) }}">Delete</a></button>
                             </div>
                         </div>
                     </div>
@@ -92,7 +106,7 @@
  
             <br>
             <br>
-            <button><a class="btn" href="/add_user_card">Add Card</a></button>
+            <button class="btn btn-outline-info"><a class="btn" href="/add_user_card">Add Card</a></button>
             
     </form>
 {% endblock %}
