@@ -5,9 +5,9 @@ from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SubmitField
 from wtforms.validators import InputRequired, Email, Length, DataRequired
 from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required, current_user
+from settings import *
 import os
 
-app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
@@ -29,14 +29,14 @@ books = [
     {
         'name': 'Harry Potter',
         'price': 7.99,
-        'id': 10,
+        'isbn': 10,
         'rating': 2,
         'comments': 'Hi'
     },
     {
         'name': 'Game of Thrones',
         'price': 17.99,
-        'id': 20,
+        'isbn': 20,
         'rating': 2,
         'comments': 'Bye'
     }
@@ -352,7 +352,7 @@ def delete_user_shipping(id):
 
 
 def validBookObject(bookObject):
-    if ("name" in bookObject and "price" in bookObject and "id" in bookObject
+    if ("name" in bookObject and "price" in bookObject and "isbn" in bookObject
             and "rating" in bookObject and "comments" in bookObject):
         return True
     else:
@@ -373,30 +373,30 @@ def add_book():
         new_book = {
             "name": request_data['name'],
             "price": request_data['price'],
-            "id": request_data['id'],
+            "isbn": request_data['isbn'],
             "rating": request_data['rating'],
             "comments": request_data['comments']
         }
         books.insert(0, new_book)
         response = Response("", 201, mimetype='application/json')
-        response.headers['Location'] = "/list_of_books/" + str(new_book['id'])
+        response.headers['Location'] = "/list_of_books/" + str(new_book['isbn'])
         return response
     else:
         invalidBookObjectErrorMsg = {
             "error": "Invalid book object passed in request",
             "helpString": "Data passed in similar must be similar to this {'name': 'bookname', 'price': 7.99, "
-                          "'id': 10, 'rating': 2, 'comments': 'comments'}"
+                          "'isbn': 10, 'rating': 2, 'comments': 'comments'}"
         }
         response = Response(json.dumps(invalidBookObjectErrorMsg), status=400, mimetype='application/json')
         return response
 
 
-# Gets book details by id
-@app.route('/book_details/<int:id>')
-def get_book_by_id(id):
+# Gets book details by isbn
+@app.route('/book_details/<int:isbn>')
+def get_book_by_isbn(isbn):
     return_value = {}
     for book in books:
-        if book["id"] == id:
+        if book["isbn"] == isbn:
             return_value = {
                 'name': book["name"],
                 'price': book["price"],
@@ -407,13 +407,13 @@ def get_book_by_id(id):
 
 
 def valid_put_request_data(request_data):
-    if("name" in request_data and "price" in request_data):
+    if "name" in request_data and "price" in request_data and "rating" in request_data and "comments" in request_data:
         return True
     else:
         return False
 
-@app.route('/list_of_books/<int:id>', methods=['PUT'])
-def replace_book(id):
+@app.route('/list_of_books/<int:isbn>', methods=['PUT'])
+def replace_book(isbn):
     request_data = request.get_json()
     if (not valid_put_request_data(request_data)):
         invalidBookObjectErrorMsg = {
@@ -429,20 +429,20 @@ def replace_book(id):
         'price': request_data["price"],
         'rating': request_data["rating"],
         'comments': request_data["comments"],
-        'id': id
+        'isbn': isbn
     }
     i = 0;
     for book in books:
-        currentId = book["id"]
-        if currentId == id:
+        currentIsbn = book["isbn"]
+        if currentIsbn == isbn:
             books[i] = new_book
         i += 1
     response = Response("", status=204)
     return response
 
 
-@app.route('/list_of_books/<int:id>', methods=['PATCH'])
-def update_book(id):
+@app.route('/list_of_books/<int:isbn>', methods=['PATCH'])
+def update_book(isbn):
     request_data = request.get_json()
     updated_book = {}
     if ("name" in request_data):
@@ -454,24 +454,24 @@ def update_book(id):
     if ("comments" in request_data):
         updated_book["comments"] = request_data['comments']
     for book in books:
-        if book["id"] == id:
+        if book["isbn"] == isbn:
             book.update(updated_book)
     response = Response("", status=204)
-    response.headers['Location'] = "/books/" + str(id)
+    response.headers['Location'] = "/books/" + str(isbn)
     return response
 
 
-@app.route('/list_of_books/<int:id>', methods=['DELETE'])
-def delete_a_book(id):
+@app.route('/list_of_books/<int:isbn>', methods=['DELETE'])
+def delete_a_book(isbn):
     i = 0;
     for book in books:
-        if book["id"] == id:
+        if book["isbn"] == isbn:
             books.pop(i)
             response = Response("", status=204)
             return response
         i += 1
     invalidBookObjectErrorMsg = {
-        "error": "Book with the Id number that was provided was not found, unable to delete"
+        "error": "Book with the isbn number that was provided was not found, unable to delete"
     }
     response = Response(json.dumps(invalidBookObjectErrorMsg), status=404, mimetype='application/json')
     return response;
