@@ -1,20 +1,26 @@
-from flask import Flask, flash, render_template, redirect, make_response, request, url_for, session, jsonify, Response, json
+from flask import Flask, flash, render_template, redirect, make_response, request, url_for, session, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SubmitField
 from wtforms.validators import InputRequired, Email, Length, DataRequired
 from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required, current_user
+
+from BookModel import *
+import json
 from settings import *
-import os
+
+import jwt, datetime
+from UserModel import User
+from functools import wraps
+
+
+
 
 app.config['SECRET_KEY'] = 'secret'
-# app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
 
-db = SQLAlchemy(app)
+books = Book.get_all_books()
+
 migrate = Migrate(app, db)
 
 book_copies = db.Table('book_copies',
@@ -24,23 +30,6 @@ book_copies = db.Table('book_copies',
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-books = [
-    {
-        'name': 'Harry Potter',
-        'price': 7.99,
-        'isbn': 10,
-        'rating': 2,
-        'comments': 'Hi'
-    },
-    {
-        'name': 'Game of Thrones',
-        'price': 17.99,
-        'isbn': 20,
-        'rating': 2,
-        'comments': 'Bye'
-    }
-]
 
 
 @login_manager.user_loader
@@ -66,18 +55,19 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    email = db.Column(db.String(128))
-    password = db.Column(db.String(128))
-    books = db.relationship('Book', secondary=book_copies, backref=db.backref('users', lazy='dynamic'))
-    user_cards = db.relationship('UserCard', backref='user')
-    user_shippings = db.relationship('UserShipping', backref='user')
 
-    physical_address = db.Column(db.String(128))
-    def __str__(self):
-        return self.name
+# class User(db.Model, UserMixin):
+# #     id = db.Column(db.Integer, primary_key=True)
+# #     name = db.Column(db.String(128))
+# #     email = db.Column(db.String(128))
+# #     password = db.Column(db.String(128))
+# #     books = db.relationship('Book', secondary=book_copies, backref=db.backref('users', lazy='dynamic'))
+# #     user_cards = db.relationship('UserCard', backref='user')
+# #     user_shippings = db.relationship('UserShipping', backref='user')
+# #
+# #     physical_address = db.Column(db.String(128))
+# #     def __str__(self):
+# #         return self.name
 
 
 class UserCard(db.Model):
@@ -99,18 +89,18 @@ class UserShipping(db.Model):
     ShippingZip = db.Column(db.String(128))
 
 
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    image_path = db.Column(db.String(128))
-    title = db.Column(db.String(128))
-    description = db.Column(db.String(128))
-    price = db.Column(db.Float)
-    authorName = db.Column(db.String(50))
-    publisher = db.Column(db.String(128))
-    genre = db.Column(db.String(32))
+# class Book(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     image_path = db.Column(db.String(128))
+#     title = db.Column(db.String(128))
+#     description = db.Column(db.String(128))
+#     price = db.Column(db.Float)
+#     authorName = db.Column(db.String(50))
+#     publisher = db.Column(db.String(128))
+#     genre = db.Column(db.String(32))
 
-    def __str__(self):
-        return f"{self.title}"
+#    def __str__(self):
+#       return f"{self.title}"
 
 
 class Authors(db.Model):
@@ -170,21 +160,35 @@ def index():
     return render_template('books.html', books=books)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            user = User.query.filter_by(name=form.name.data).first()
-            if user and (user.password == form.password.data):
-                login_user(user, remember=form.remember.data)
-                print(current_user.name)
-                flash("You are now logged in", 'success')
-                return redirect(url_for('index'))
-            else:
-                flash("That username could not be found/password/username are incorrect", 'error')
+@app.route('/login', methods=['POST'])
+def get_token():
+    request_data = request.get_json()
+    name = str(request_data['name'])
+    password = str(request_data['password'])
+    email = str(request_data['email'])
+
+    match = User.username_password_match(name, password, email)
+
+    if match:
+        expiration_date = datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
+        token = jwt.encode({'exp': expiration_date}, app.config['SECRET_KEY'], algorithm='HS256')
+        return token
+    else:
+        return Response('', 401, mimetype='application/json')
+
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('index'))
+    # form = LoginForm()
+    # if request.method == 'POST':
+    #     if form.validate_on_submit():
+    #         user = User.query.filter_by(name=form.name.data).first()
+    #         if user and (user.password == form.password.data):
+    #             login_user(user, remember=form.remember.data)
+    #             print(current_user.name)
+    #             flash("You are now logged in", 'success')
+    #             return redirect(url_for('index'))
+    #         else:
+    #             flash("That username could not be found/password/username are incorrect", 'error')
 
     return render_template('login.html', title='Login', form=form)
 
@@ -249,13 +253,13 @@ def user_profile():
         email = request.form['email']
         password = request.form['password']
         physical_address = request.form['physical_address']
-        current_user.name = name 
-        current_user.email = email 
-        current_user.password = password 
+        current_user.name = name
+        current_user.email = email
+        current_user.password = password
         current_user.physical_address = physical_address
-        user_db.name = name 
-        user_db.email = email 
-        user_db.password = password 
+        user_db.name = name
+        user_db.email = email
+        user_db.password = password
         user_db.physical_address = physical_address
         db.session.commit()
         flash('successfully updated', 'success')
@@ -267,7 +271,7 @@ def user_profile():
 @app.route('/add_user_card', methods=['GET', 'POST'])
 def add_user_card():
     if request.method == 'POST':
-        user_id = current_user.id 
+        user_id = current_user.id
         credit_card_num = request.form['CreditCardNum']
         expMonth = request.form['ExpMonth']
         expYear = request.form['ExpYear']
@@ -290,8 +294,9 @@ def add_user_shipping():
         ShippingAddr = request.form['ShippingAddr']
         ShippingCity = request.form['ShippingCity']
         ShippingState = request.form['ShippingState']
-        ShippingZip   = request.form['ShippingZip']
-        new_user_shipping = UserShipping(UserID=UserID,ShippingAddr=ShippingAddr,ShippingCity=ShippingCity,ShippingState=ShippingState,ShippingZip=ShippingZip)
+        ShippingZip = request.form['ShippingZip']
+        new_user_shipping = UserShipping(UserID=UserID, ShippingAddr=ShippingAddr, ShippingCity=ShippingCity,
+                                         ShippingState=ShippingState, ShippingZip=ShippingZip)
         db.session.add(new_user_shipping)
         db.session.commit()
         flash('new shipping succesfully added', 'success')
@@ -304,39 +309,40 @@ def add_user_shipping():
 def edit_user_card(id):
     user_card = UserCard.query.filter_by(id=id).first()
     if request.method == 'POST':
-         user_card.UserID = current_user.id
-         user_card.CreditCardNum = request.form['CreditCardNum']
-         user_card.ExpMonth = request.form['ExpMonth']
-         user_card.ExpYear  = request.form['ExpYear']
-         user_card.CVS      = request.form['CVS']
-         user_card.NameOnCard = request.form['NameOnCard']
-         db.session.commit()
-         flash('Edited Card successfully','success')
-         return redirect(url_for('user_profile'))
-    return render_template('edit_user_card.html',user_card=user_card)
+        user_card.UserID = current_user.id
+        user_card.CreditCardNum = request.form['CreditCardNum']
+        user_card.ExpMonth = request.form['ExpMonth']
+        user_card.ExpYear = request.form['ExpYear']
+        user_card.CVS = request.form['CVS']
+        user_card.NameOnCard = request.form['NameOnCard']
+        db.session.commit()
+        flash('Edited Card successfully', 'success')
+        return redirect(url_for('user_profile'))
+    return render_template('edit_user_card.html', user_card=user_card)
 
 
 @app.route('/user_profile/edit_user_shipping/<int:id>', methods=['GET', 'POST'])
 def edit_user_shipping(id):
     user_shipping = UserShipping.query.filter_by(id=id).first()
     if request.method == 'POST':
-         user_shipping.ShippingAddr = request.form['ShippingAddr']
-         user_shipping.ShippingCity = request.form['ShippingCity']
-         user_shipping.ShippingState = request.form['ShippingState']
-         user_shipping.ShippingZip   = request.form['ShippingZip']
+        user_shipping.ShippingAddr = request.form['ShippingAddr']
+        user_shipping.ShippingCity = request.form['ShippingCity']
+        user_shipping.ShippingState = request.form['ShippingState']
+        user_shipping.ShippingZip = request.form['ShippingZip']
 
-         db.session.commit()
-         flash('Successfully updated','success')
-         return redirect(url_for('user_profile'))
+        db.session.commit()
+        flash('Successfully updated', 'success')
+        return redirect(url_for('user_profile'))
 
-    return render_template('edit_user_shipping.html',user_shipping=user_shipping)
+    return render_template('edit_user_shipping.html', user_shipping=user_shipping)
+
 
 @app.route('/user_profile/delete_user_card/<int:id>', methods=['GET', 'POST'])
 def delete_user_card(id):
     user_card = UserCard.query.filter_by(id=id).first()
     db.session.delete(user_card)
     db.session.commit()
-    flash('Successfully deleted','success')
+    flash('Successfully deleted', 'success')
     return redirect(url_for('user_profile'))
 
 
@@ -347,16 +353,27 @@ def delete_user_shipping(id):
     print(user_shipping)
     db.session.delete(user_shipping)
     db.session.commit()
-    flash('Successfully deleted','success')
+    flash('Successfully deleted', 'success')
     return redirect(url_for('user_profile'))
 
 
-def validBookObject(bookObject):
-    if ("name" in bookObject and "price" in bookObject and "isbn" in bookObject
-            and "rating" in bookObject and "comments" in bookObject):
-        return True
-    else:
-        return False
+def token_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        token = request.args.get('token')
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'])
+            return f(*args, **kwargs)
+        except:
+            return jsonify({'error': 'Need a valid token to view this page'}), 401
+    return wrapper
+
+
+# GET /user_purchased_books?token=skhdskfjhskfa
+@app.route('/user_purchased_books')
+@token_required
+def get_user_purchased_books():
+    return jsonify({'books': books})
 
 
 # Gets list of books (Might be replaced with books)
@@ -365,116 +382,96 @@ def get_books():
     return jsonify({'books': books})
 
 
+# Gets book details by bookId
+@app.route('/book_details/<int:bookId>')
+def get_book_by_bookId(bookId):
+    return_value = Book.get_book(bookId)
+    return jsonify(return_value)
+
+
+def validBookObject(bookObject):
+    if ("bookTitle" in bookObject and "price" in bookObject and "bookId" in bookObject
+            and "rating" in bookObject and "comments" in bookObject):
+        return True
+    else:
+        return False
+
+
 # Adds books (Might use/replace method at bottom)
 @app.route('/list_of_books', methods=['POST'])
 def add_book():
     request_data = request.get_json()
-    if (validBookObject(request_data)):
-        new_book = {
-            "name": request_data['name'],
-            "price": request_data['price'],
-            "isbn": request_data['isbn'],
-            "rating": request_data['rating'],
-            "comments": request_data['comments']
-        }
-        books.insert(0, new_book)
+    if validBookObject(request_data):
+        Book.add_book(request_data['bookTitle'], request_data['price'], request_data['bookId'], request_data['rating'],
+                      request_data['comments'])
         response = Response("", 201, mimetype='application/json')
-        response.headers['Location'] = "/list_of_books/" + str(new_book['isbn'])
+        response.headers['Location'] = "/list_of_books/" + str(request_data['bookId'])
         return response
     else:
         invalidBookObjectErrorMsg = {
             "error": "Invalid book object passed in request",
-            "helpString": "Data passed in similar must be similar to this {'name': 'bookname', 'price': 7.99, "
-                          "'isbn': 10, 'rating': 2, 'comments': 'comments'}"
+            "helpString": "Data passed in similar must be similar to this {'bookTitle': 'bookname', 'price': 7.99, "
+                          "'bookId': 10, 'rating': 3, 'comments': 'comments'}"
         }
         response = Response(json.dumps(invalidBookObjectErrorMsg), status=400, mimetype='application/json')
         return response
 
 
-# Gets book details by isbn
-@app.route('/book_details/<int:isbn>')
-def get_book_by_isbn(isbn):
-    return_value = {}
-    for book in books:
-        if book["isbn"] == isbn:
-            return_value = {
-                'name': book["name"],
-                'price': book["price"],
-                'rating': book["rating"],
-                'comments': book["comments"]
-            }
-    return jsonify(return_value)
-
-
 def valid_put_request_data(request_data):
-    if "name" in request_data and "price" in request_data and "rating" in request_data and "comments" in request_data:
+    if "bookTitle" in request_data and "price" in request_data and "rating" in request_data and "comments" in request_data:
         return True
     else:
         return False
 
-@app.route('/list_of_books/<int:isbn>', methods=['PUT'])
-def replace_book(isbn):
+
+@app.route('/list_of_books/<int:bookId>', methods=['PUT'])
+def replace_book(bookId):
     request_data = request.get_json()
-    if (not valid_put_request_data(request_data)):
+    if not valid_put_request_data(request_data):
         invalidBookObjectErrorMsg = {
             "error": "Valid book object must be passed in the request",
-            "helpString": "Data passed in similar must be similar to this {'name': 'bookname', 'price': 7.99, "
+            "helpString": "Data passed in must be similar to this {'bookTitle': 'bookname', 'price': 7.99, "
                           "'rating': 2, 'comments': 'comments'}"
 
         }
         response = Response(json.dumps(invalidBookObjectErrorMsg), status=400, mimetype='application/json')
         return response
-    new_book = {
-        'name': request_data["name"],
-        'price': request_data["price"],
-        'rating': request_data["rating"],
-        'comments': request_data["comments"],
-        'isbn': isbn
-    }
-    i = 0;
-    for book in books:
-        currentIsbn = book["isbn"]
-        if currentIsbn == isbn:
-            books[i] = new_book
-        i += 1
+
+    Book.replace_book(bookId, request_data['bookTitle'], request_data['price'], request_data['rating'],
+                      request_data['comments'])
     response = Response("", status=204)
     return response
 
 
-@app.route('/list_of_books/<int:isbn>', methods=['PATCH'])
-def update_book(isbn):
+@app.route('/list_of_books/<int:bookId>', methods=['PATCH'])
+def update_book(bookId):
     request_data = request.get_json()
-    updated_book = {}
-    if ("name" in request_data):
-        updated_book["name"] = request_data['name']
-    if ("price" in request_data):
-        updated_book["price"] = request_data['price']
-    if ("rating" in request_data):
-        updated_book["rating"] = request_data['rating']
-    if ("comments" in request_data):
-        updated_book["comments"] = request_data['comments']
-    for book in books:
-        if book["isbn"] == isbn:
-            book.update(updated_book)
+
+    if "bookTitle" in request_data:
+        Book.update_book_name(bookId, request_data['bookTitle'])
+    if "price" in request_data:
+        Book.update_book_price(bookId, request_data['price'])
+    if "rating" in request_data:
+        Book.update_book_rating(bookId, request_data['rating'])
+    if "comments" in request_data:
+        Book.update_book_comments(bookId, request_data['comments'])
+
     response = Response("", status=204)
-    response.headers['Location'] = "/books/" + str(isbn)
+    response.headers['Location'] = "/books/" + str(bookId)
     return response
 
 
-@app.route('/list_of_books/<int:isbn>', methods=['DELETE'])
-def delete_a_book(isbn):
-    i = 0;
-    for book in books:
-        if book["isbn"] == isbn:
-            books.pop(i)
-            response = Response("", status=204)
-            return response
-        i += 1
+@app.route('/list_of_books/<int:bookId>', methods=['DELETE'])
+def delete_a_book(bookId):
+    if Book.delete_book(bookId):
+        response = Response("", status=204)
+        return response
+
     invalidBookObjectErrorMsg = {
-        "error": "Book with the isbn number that was provided was not found, unable to delete"
+        "error": "Book with the bookId number that was provided was not found, unable to delete"
     }
     response = Response(json.dumps(invalidBookObjectErrorMsg), status=404, mimetype='application/json')
-    return response;
+    return response
 
 
 # book edit view
@@ -587,7 +584,6 @@ def move_to_cart(book_id):
     db.session.commit()
 
     return redirect(url_for('cart'))
-
 
 
 @app.route('/addbook', methods=['GET', 'POST'])
