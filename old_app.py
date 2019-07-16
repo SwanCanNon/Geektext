@@ -1,4 +1,21 @@
-from settings import *
+from flask import Flask, flash, render_template, redirect, make_response, request, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_wtf import FlaskForm
+from wtforms import Form, BooleanField, StringField, PasswordField, validators, SubmitField
+from wtforms.validators import InputRequired, Email, Length, DataRequired
+from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required, current_user
+import os
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret'
+# app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.db"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:YES@localhost/geek_text"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:aa09@localhost/geek_text"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bce5ce263e3ba7:1543b1ce@us-cdbr-iron-east-02.cleardb.net/heroku_e86cfb095c1e8fa"
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 book_copies = db.Table('book_copies',
                        db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -41,8 +58,8 @@ class User(db.Model, UserMixin):
     books = db.relationship('Book', secondary=book_copies, backref=db.backref('users', lazy='dynamic'))
     user_cards = db.relationship('UserCard', backref='user')
     user_shippings = db.relationship('UserShipping', backref='user')
-
     physical_address = db.Column(db.String(128))
+
     def __str__(self):
         return self.name
 
@@ -77,7 +94,7 @@ class Book(db.Model):
     genre = db.Column(db.String(32))
 
     def __str__(self):
-      return f"{self.title}"
+        return f"{self.title}"
 
 
 class Authors(db.Model):
@@ -137,7 +154,7 @@ def index():
     return render_template('books.html', books=books)
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -338,7 +355,7 @@ def user_book(id):
 @app.route('/add_to_cart/<int:book_id>')
 def add_to_cart(book_id):
     user_id = current_user.id
-    # check thru books for the book with the specified id 
+    # check thru books for the book with the specified id
     # check thru the book copy for the book copy with the id
     book = Cart(user_id=user_id, book_id=book_id, quantity=1)
     db.session.add(book)
@@ -351,7 +368,7 @@ def add_to_cart(book_id):
 @app.route('/save_for_later/<int:book_id>')
 def save_for_later(book_id):
     user_id = current_user.id
-    # check thru books for the book with the specified id 
+    # check thru books for the book with the specified id
     # check thru the book copy for the book copy with the id
     book = Saveforlater(user_id=user_id, book_id=book_id)
     db.session.add(book)
@@ -368,7 +385,7 @@ def save_for_later(book_id):
 
 @app.route('/cart')
 def cart():
-    # query the db for the cart object with the 
+    # query the db for the cart object with the
     # user id of the user of the current session
     user_id = current_user.id
     user_cart = Cart.query.filter_by(user_id=user_id).all()
@@ -419,7 +436,7 @@ def delete_saved_book(book_id):
 @app.route('/move_to_cart/<int:book_id>')
 def move_to_cart(book_id):
     user_id = current_user.id
-    # check thru books for the book with the specified id 
+    # check thru books for the book with the specified id
     # check thru the book copy for the book copy with the id
     book = Cart(user_id=user_id, book_id=book_id, quantity=1)
     db.session.add(book)
@@ -452,3 +469,4 @@ def author_page():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
