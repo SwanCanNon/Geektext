@@ -1,4 +1,5 @@
 from settings import *
+from BookRatingsAndCommentsModel import *
 
 book_copies = db.Table('book_copies',
                        db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -43,6 +44,7 @@ class User(db.Model, UserMixin):
     user_shippings = db.relationship('UserShipping', backref='user')
 
     physical_address = db.Column(db.String(128))
+
     def __str__(self):
         return self.name
 
@@ -64,20 +66,6 @@ class UserShipping(db.Model):
     ShippingCity = db.Column(db.String(128))
     ShippingState = db.Column(db.String(128))
     ShippingZip = db.Column(db.String(128))
-
-
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    image_path = db.Column(db.String(128))
-    title = db.Column(db.String(128))
-    description = db.Column(db.String(128))
-    price = db.Column(db.Float)
-    authorName = db.Column(db.String(50))
-    publisher = db.Column(db.String(128))
-    genre = db.Column(db.String(32))
-
-    def __str__(self):
-      return f"{self.title}"
 
 
 class Authors(db.Model):
@@ -118,26 +106,13 @@ def real_index():
     return redirect(url_for('index'))
 
 
-@app.route('/books', methods=['GET', 'POST'])
+@app.route('/books')
 def index():
-    books = Book.query.all()
-    authors = Authors.query.all()
-    print(authors)
-    for author in authors:
-        print(author.AuthorID)
-        print(author.AuthorName)
-        print(author.AuthorBio)
-
-    print(books)
-
-    for book in books:
-        print(book.title)
-        print(book.description)
-        print(book.price)
+    books = Book.get_all_books()
     return render_template('books.html', books=books)
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -328,13 +303,6 @@ def book(id):
     return render_template('book.html', book=book, author=author)
 
 
-@app.route('/user_books/<int:id>')
-def user_book(id):
-    # check book with the id that belongs to the user
-    books = Book.query.filter_by()
-    return render_template('user_books.html')
-
-
 @app.route('/add_to_cart/<int:book_id>')
 def add_to_cart(book_id):
     user_id = current_user.id
@@ -448,6 +416,46 @@ def addbook():
 @app.route('/author', methods=['GET', 'POST'])
 def author_page():
     return render_template('author.html')
+
+
+comments = []
+
+
+def store_comments(comments):
+    comments.append(dict(
+        comments=comments,
+        user="marcos",
+        date=datetime.utcnow()
+    ))
+
+
+def new_comments(num):
+    return sorted(comments, key=lambda bm: bm['date'], reverse=True)[:num]
+
+
+@app.route('/add_comments', methods=['GET', 'POST'])
+def add_comments():
+    if request.method == "POST":
+        comments = request.form['comments']
+        store_comments(comments)
+        flash("Stored Comment '{}'".format(comments))
+        return render_template(url_for('user_comments.html', new_comments(2)))
+    return render_template('star_rating.html')
+
+
+@app.route('/user_comments')
+def view_user_comments():
+    return render_template('user_comments.html')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template('500.html'), 500
 
 
 if __name__ == '__main__':

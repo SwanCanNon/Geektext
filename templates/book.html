@@ -79,10 +79,24 @@
 				<p>About The Author</p>
 				<p>{{author.AuthorBio}}</p>
 			</div>
-			
-			
+
 			<div class="row">
 				<p> Publisher : {{ book.publisher }}</p>
+			</div>
+
+			<div class="row">
+				<p>Comments : </p>
+				{% if new_comments %}
+					<ul>
+						{% for comments in new_comments %}
+							<li>{{ comments.user }} added  <a>{{ comments.comment }}</a></li>
+						{% endfor %}
+					</ul>
+				{% else %}
+				<p>&nbsp No comments yet.</p>
+				{% endif %}
+			</div>
+			<a href="{{ url_for('view_user_comments') }}">View All Comments For Book</a>
 		</div>
 	</div>
 </div>

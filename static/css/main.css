@@ -172,18 +172,24 @@ footer h3{
     color: white;
 }
 
+/* flashes styling */
+.flashes ul {
+    margin: 0 0;
+    background: #FFD6A3;
+    color: #000;
 
+    list-style-type: none;
+    list-style: none;
+}
 
+.flashes ul{
+    background: #FFD6A3;
+    color: #000;
+}
 
-
-
-
-
-
-
-
-
-
+article.flashes{
+    margin-bottom: 1em;
+}
 
 /* ==========================================================================
    Media Queries
