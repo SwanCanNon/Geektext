@@ -7,6 +7,8 @@
 -- Server version: 10.3.15-MariaDB
 -- PHP Version: 7.3.6
 
+CREATE DATABASE IF NOT EXISTS geek_text;
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -27,12 +29,13 @@ SET time_zone = "+00:00";
 --
 -- Table structure for table `authors`
 --
+USE geek_text;
 
 CREATE TABLE `authors` (
   `AuthorID` int(11) NOT NULL,
   `AuthorName` varchar(50) DEFAULT NULL,
   `AuthorBio` varchar(10000) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `authors`
@@ -86,14 +89,13 @@ CREATE TABLE `books` (
   `BookTitle` varchar(255) DEFAULT NULL,
   `BookDescription` varchar(10000) DEFAULT NULL,
   `AuthorID` int(11) DEFAULT NULL,
-  `AuthorID` int(11) DEFAULT NULL,
   `PublisherID` int(11) DEFAULT NULL,
   `ReleaseDate` date DEFAULT NULL,
   `Genre` varchar(20) DEFAULT NULL,
   `Price` decimal(16,2) DEFAULT NULL,
   `BookCover` varchar(200) DEFAULT NULL,
   `BookRating` int(11) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -118,7 +120,7 @@ CREATE TABLE `book_copies` (
 CREATE TABLE `book_genres` (
   `BookGenreID` int(11) NOT NULL,
   `Genre` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `book_genres`
@@ -169,7 +171,7 @@ CREATE TABLE `book_ratings` (
   `UserID` int(11) DEFAULT NULL,
   `Rating` int(11) DEFAULT NULL,
   `Comment` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -206,7 +208,7 @@ CREATE TABLE `publishers` (
   `PublisherID` int(11) NOT NULL,
   `PublisherName` varchar(255) DEFAULT NULL,
   `PublisherDescription` varchar(10000) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `publishers`
@@ -253,7 +255,7 @@ CREATE TABLE `users` (
   `Email` varchar(255) DEFAULT NULL,
   `Hash` varchar(2000) DEFAULT NULL,
   `Salt` varchar(2000) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -267,7 +269,7 @@ CREATE TABLE `user_cards` (
   `ExpMonth` int(11) NOT NULL,
   `ExpYear` int(11) NOT NULL,
   `NameOnCard` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -282,7 +284,7 @@ CREATE TABLE `user_detail` (
   `HomeCity` varchar(2000) DEFAULT NULL,
   `HomeState` varchar(2000) DEFAULT NULL,
   `HomeZIP` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -294,7 +296,7 @@ CREATE TABLE `user_purchased` (
   `UserID` int(11) NOT NULL,
   `BookID` int(11) NOT NULL,
   `DatePurchased` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -308,7 +310,7 @@ CREATE TABLE `user_shippings` (
   `ShippingCity` varchar(2000) NOT NULL,
   `ShippingState` varchar(2000) NOT NULL,
   `ShippingZIP` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for dumped tables
