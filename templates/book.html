@@ -8,26 +8,25 @@
 	<div class = "row">
 		<div class="col-sm-4">
 			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title text-center">{{book.title}}</h4>
-					<h5 class="card-subtitle mb-1 text-center"><a href="{{ url_for('author_page') }}">{{book.authorName}}</a></h5>
-					<h6 class="card-subtitle mb-1 text-muted text-center">{{ book.genre }}</h6>
-					<div class="text-center">
-						<img id="myImg" class="img-thumbnail" src ="{{ book.image_path }}" alt="Book Image" style="width:100%;max-width:300px">
-						<!-- The Modal -->
-						<div id="myModal" class="modal">
+				<h4 class="card-title text-center">{{book.title}}</h4>
+				<h5 class="card-subtitle mb-1 text-center"><a href="{{ url_for('author_page') }}">{{book.authorName}}</a></h5>
+				<h6 class="card-subtitle mb-1 text-muted text-center">{{ book.genre }}</h6>
+				<div class="text-center">
+					<img id="myImg" class="img-thumbnail" src ="{{ book.image_path }}" alt="Book Image" style="width:100%;max-width:300px">
+					<!-- The Modal -->
+					<div id="myModal" class="modal">
 
-						  <!-- The Close Button -->
-						  <span class="close">&times;</span>
+						<!-- The Close Button -->
+						<span class="close">&times;</span>
 
-						  <!-- Modal Content (The Image) -->
-						  <img class="modal-content" id="img01">
+						<!-- Modal Content (The Image) -->
+						<img class="modal-content" id="img01">
 
-						  <!-- Modal Caption (Image Text) -->
-						  <div id="caption"></div>
-						</div>
+						<!-- Modal Caption (Image Text) -->
+						<div id="caption"></div>
 					</div>
-					<section class='rating-widget'>
+				</div>
+				<section class='rating-widget'>
 
 					<!-- Rating Stars Box -->
 					<div class='rating-stars text-left'>
@@ -58,9 +57,7 @@
 					</div>
 					</section>
 					-->
-			
-					
-					</div>
+
 					<ul class="list-group list-group-flush">
 						<li class="list-group-item text-center">${{ book.price }}</li>
 					</ul>
@@ -89,14 +86,14 @@
 				{% if new_comments %}
 					<ul>
 						{% for comments in new_comments %}
-							<li>{{ comments.user }} added  <a>{{ comments.comment }}</a></li>
+							<li>{{ comments.user }} added  <a>{{ comments.text }}</a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
 				<p>&nbsp No comments yet.</p>
 				{% endif %}
 			</div>
-			<a href="{{ url_for('view_user_comments') }}">View All Comments For Book</a>
+			<a href="{{ url_for('book_comments') }}">View All Comments For Book</a>
 		</div>
 	</div>
 </div>

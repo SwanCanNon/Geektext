@@ -1,7 +1,7 @@
 from flask import Flask, flash, render_template, redirect, make_response, request, url_for, session, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import datetime
+from datetime import datetime
 
 import pymysql
 import mysql.connector

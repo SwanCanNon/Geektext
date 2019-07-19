@@ -421,9 +421,9 @@ def author_page():
 comments = []
 
 
-def store_comments(comments):
+def store_comments(text):
     comments.append(dict(
-        comments=comments,
+        text=text,
         user="marcos",
         date=datetime.utcnow()
     ))
@@ -433,13 +433,13 @@ def new_comments(num):
     return sorted(comments, key=lambda bm: bm['date'], reverse=True)[:num]
 
 
-@app.route('/add_comments', methods=['GET', 'POST'])
-def add_comments():
+@app.route('/book_comments/', methods=['GET', 'POST'])
+def book_comments():
     if request.method == "POST":
         comments = request.form['comments']
         store_comments(comments)
         flash("Stored Comment '{}'".format(comments))
-        return render_template(url_for('user_comments.html', new_comments(2)))
+        return redirect(url_for('book.html', new_comments(2)))
     return render_template('star_rating.html')
 
 
