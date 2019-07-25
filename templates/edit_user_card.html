@@ -1,15 +1,19 @@
 {% extends 'layout.html'%}
 
 {% block body %}
+<h1>Edit User Card</h1>
+<form action="{{ url_for('edit_user_card', id=user_card.id) }}" method="POST">
 
-<form action="/edit_user_card" method="POST">
-    <input type="text" name="" value="{{ }}">
-    <input type="text" name=""  value="{{user_card.UserID }}">
-    <input type="text" name=""  value="{{user_card.CreditCardNume }}">
-    <input type="text" name=""  value="{{user_card.ExpMonth }}">
-    <input type="text" name="" value="{{user_card.ExpYear }}">
-    <input type="text" name=""value="{{user_card.CVS }}">
-    <input type="text" name="" value="{{user_card.NameOnCard }}">
+    <input type="text" name="NameOnCard" value="{{user_card.NameOnCard }}" class="form form-control">
+    <br>
+    <input type="text" name="CreditCardNum"  value="{{user_card.CreditCardNum }}" class="form form-control">
+    <br>
+    <input type="text" name="ExpMonth"  value="{{user_card.ExpMonth }}" class="form form-control">
+    <br>
+    <input type="text" name="ExpYear" value="{{user_card.ExpYear }}" class="form form-control">
+    <br>
+    <input type="text" name="CVS"value="{{user_card.CVS }}" class="form form-control">
+    <br>
     <button type="submit">submit</button>
 </form>
 

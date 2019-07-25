@@ -1,12 +1,23 @@
 {% extends 'layout.html'%}
 
 {% block body %}
-<form action="/edit_user_shipping" method="POST">
-    <input type="text" name="" value="{{user_shipping.UserID }}">
-    <input type="text" value="{{user_shipping.ShippingAddr }}">
-    <input type="text" value="{{user_card.ShippingCity }}">
-    <input type="text" value="{{user_shipping.ShippingState }}">
-    <input type="text" value="{{user_shipping.ShippingZip }}">
+
+<h1>Edit User Shipping</h1>
+
+<form action="{{ url_for('edit_user_shipping', id=user_shipping.id) }}" method="POST">
+
+    Shipping Address
+    <input type="text" name="ShippingAddr" value="{{user_shipping.ShippingAddr }}" class="form form-control" >
+    <br>
+    Shipping City
+    <input type="text" name="ShippingCity" value="{{user_shipping.ShippingCity }}"  class="form form-control">
+    <br>
+    Shipping State
+    <input type="text" name="ShippingState" value="{{user_shipping.ShippingState }}" class="form form-control">
+    <br>
+    Zip Code
+    <input type="text" name="ShippingZip" value="{{user_shipping.ShippingZip }}" class="form form-control">
+    <br>
     <button type="submit">submit</button>
 </form>
 {% endblock %}
